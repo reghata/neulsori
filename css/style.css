@@ -283,3 +283,12 @@ button {
         font-size: 1.2em;
     }
 }
+/* 설정 버튼 호버 효과 */
+#settings-screen button:hover {
+    opacity: 0.9;
+}
+
+/* 활성화된 설정 버튼 */
+#settings-screen button.active {
+    background: #4CAF50 !important;
+}
