@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>늘소리</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+</head>
+<body class="font-large">
+    <!-- 스플래시 화면 -->
+    <div id="splash-screen" class="screen active">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+            <h1 style="font-size: 72px; color: #4CAF50; margin-bottom: 30px;">늘소리</h1>
+            <div style="font-size: 24px; color: #666;">로딩 중...</div>
+        </div>
+    </div>
+
+    <!-- 메인 화면 -->
+    <div id="main-screen" class="screen">
+        <header>
+            <h1 class="logo">늘소리</h1>
+            <button class="icon-btn" onclick="showScreen('settings-screen')">⚙️</button>
+        </header>
+        
+        <div class="main-menu">
+            <button class="menu-btn primary" onclick="showScreen('speak-screen')">
+                <span class="icon">🗣️</span>
+                <span>말하기</span>
+            </button>
+            
+            <button class="menu-btn" onclick="showScreen('favorites-screen')">
+                <span class="icon">⭐</span>
+                <span>즐겨찾기</span>
+            </button>
+            
+            <button class="menu-btn" onclick="showScreen('all-words-screen')">
+                <span class="icon">📝</span>
+                <span>모든 단어</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 말하기 화면 -->
+    <div id="speak-screen" class="screen">
+        <header>
+            <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
+            <h2>말하기</h2>
+            <div style="width: 44px;"></div>
+        </header>
+        
+        <div class="word-container" id="speak-word-list">
+            <!-- 단어들이 여기 표시됨 -->
+        </div>
+        
+        <button class="fab" onclick="addWord()">+</button>
+    </div>
+
+    <!-- 즐겨찾기 화면 -->
+    <div id="favorites-screen" class="screen">
+        <header>
+            <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
+            <h2>즐겨찾기</h2>
+            <div style="width: 44px;"></div>
+        </header>
+        
+        <div class="word-container" id="favorites-word-list">
+            <!-- 즐겨찾기 단어들이 여기 표시됨 -->
+        </div>
+    </div>
+
+    <!-- 모든 단어 화면 -->
+    <div id="all-words-screen" class="screen">
+        <header>
+            <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
+            <h2>모든 단어</h2>
+            <button class="icon-btn" id="edit-mode-btn" onclick="toggleEditMode()">✏️</button>
+        </header>
+        
+        <div class="sort-toggle">
+            <button id="sort-alpha" class="active" onclick="changeSortOrder('alphabet')">ㄱㄴㄷ순</button>
+            <button id="sort-freq" onclick="changeSortOrder('frequency')">자주 사용순</button>
+        </div>
+        
+        <div class="word-container" id="all-words-list">
+            <!-- 모든 단어들이 여기 표시됨 -->
+        </div>
+        
+        <button class="fab" onclick="addWord()">+</button>
+    </div>
+
+    <!-- 설정 화면 -->
+    <div id="settings-screen" class="screen">
+        <header>
+            <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
+            <h2>설정</h2>
+            <div style="width: 44px;"></div>
+        </header>
+        
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
+                <h3>글자 크기</h3>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="changeFontSize('normal')">보통</button>
+                    <button onclick="changeFontSize('large')">크게</button>
+                    <button onclick="changeFontSize('xlarge')">아주 크게</button>
+                </div>
+            </div>
+            
+            <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
+                <h3>말하기 속도</h3>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="changeSpeechRate('normal')">보통</button>
+                    <button onclick="changeSpeechRate('slow')">느리게</button>
+                    <button onclick="changeSpeechRate('verySlow')">아주 느리게</button>
+                </div>
+            </div>
+
+
+            <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
+                <h3>데이터 관리</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <button onclick="document.getElementById('file-input').click()">
+                        📥 단어 가져오기 (CSV)
+                    </button>
+                    <input type="file" id="file-input" accept=".csv,.txt" style="display: none;" onchange="importWords(event)">
+                    
+                    <button onclick="exportWords()">📤 단어 내보내기</button>
+                    <button onclick="resetApp()" style="background: #f44336; color: white;">🔄 초기화</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 단어 추가 모달 -->
+    <div id="add-word-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px;">
+            <h3 style="margin-bottom: 20px;">새 단어 추가</h3>
+            <input type="text" id="new-word-input" placeholder="단어를 입력하세요" style="width: 100%; padding: 15px; font-size: 20px; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="confirmAddWord()" style="flex: 1; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 10px; font-size: 18px;">추가</button>
+                <button onclick="closeAddWordModal()" style="flex: 1; padding: 15px; background: #666; color: white; border: none; border-radius: 10px; font-size: 18px;">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/Datastorage.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
