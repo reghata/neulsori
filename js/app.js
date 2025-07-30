@@ -48,6 +48,10 @@ function showScreen(screenId) {
     } else if (screenId === 'all-words-screen') {
         displayWords('all-words-list', storage.getSortedWords(currentSortOrder));
     }
+        // 설정 화면일 때 현재 설정 표시
+    if (screenId === 'settings-screen') {
+        highlightCurrentSettings();
+    }
 }
 
 // 단어 목록 표시
@@ -224,8 +228,78 @@ function changeSpeechRate(rate) {
         'slow': 0.85,
         'verySlow': 0.75
     };
+    
+    // 속도 변경
     speechRate = rates[rate];
     storage.updateSettings({ speechRate: rate });
+    
+    // 버튼 스타일 업데이트 (선택된 버튼 표시)
+    const buttons = document.querySelectorAll('#settings-screen button');
+    buttons.forEach(btn => {
+        if (btn.textContent === '보통' || btn.textContent === '느리게' || btn.textContent === '아주 느리게') {
+            btn.style.background = '#2196F3';
+            btn.style.color = 'white';
+        }
+    });
+    
+    // 현재 선택된 버튼 강조
+    event.target.style.background = '#4CAF50';
+    
+    // "안녕하세요" 샘플 재생
+    playSpeedSample();
+}
+
+// 속도 샘플 재생 함수
+function playSpeedSample() {
+    // 이전 음성 중지
+    window.speechSynthesis.cancel();
+    
+    // 시각적 피드백
+    const originalText = event.target.textContent;
+    event.target.textContent = '재생 중...';
+    
+    // 샘플 음성 재생
+    const utterance = new SpeechSynthesisUtterance('안녕하세요');
+    utterance.lang = 'ko-KR';
+    utterance.rate = speechRate;
+    
+    utterance.onend = () => {
+        // 버튼 텍스트 복원
+        event.target.textContent = originalText;
+    };
+    
+    window.speechSynthesis.speak(utterance);
+}
+
+// 페이지 로드 시 현재 설정 표시를 위한 함수 추가
+function highlightCurrentSettings() {
+    const settings = storage.getSettings();
+    
+    // 글자 크기 버튼 하이라이트
+    document.querySelectorAll('#settings-screen button').forEach(btn => {
+        if (btn.onclick && btn.onclick.toString().includes('changeFontSize')) {
+            if (
+                (settings.fontSize === 'normal' && btn.textContent === '보통') ||
+                (settings.fontSize === 'large' && btn.textContent === '크게') ||
+                (settings.fontSize === 'xlarge' && btn.textContent === '아주 크게')
+            ) {
+                btn.style.background = '#4CAF50';
+                btn.style.color = 'white';
+            }
+        }
+        
+        // 말하기 속도 버튼 하이라이트
+        if (btn.onclick && btn.onclick.toString().includes('changeSpeechRate')) {
+            if (
+                (settings.speechRate === 'normal' && btn.textContent === '보통') ||
+                (settings.speechRate === 'slow' && btn.textContent === '느리게') ||
+                (settings.speechRate === 'verySlow' && btn.textContent === '아주 느리게')
+            ) {
+                btn.style.background = '#4CAF50';
+                btn.style.color = 'white';
+            }
+        }
+    });
 }
 
 // 설정 적용
