@@ -93,7 +93,7 @@ function selectVoiceByGender(gender) {
     );
     
     selectedVoiceIndex = voices.indexOf(preferredVoice || koreanVoices[0]);
-    console.log(`${gender} 음성 선택:`, voices[selectedVoiceIndex].name);
+    console.log(`${gender} 음성 선택:`, voices[selectedVoiceIndex]?.name);
 }
 
 // 화면 전환
@@ -211,7 +211,8 @@ function highlightCurrentSettings() {
     const settings = storage.getSettings();
     
     document.querySelectorAll('[data-setting-value]').forEach(btn => {
-        const key = btn.parentElement.previousElementSibling.textContent;
+        const parentDiv = btn.parentElement.parentElement;
+        const key = parentDiv.querySelector('h3').textContent;
         let settingKey;
         if (key === '글자 크기') settingKey = 'fontSize';
         else if (key === '말하기 속도') settingKey = 'speechRate';
@@ -271,6 +272,8 @@ function deleteWord(wordId) {
     }
 }
 
+// (데이터 관리, 치료사 모드 관련 함수들은 기존과 동일하게 유지)
+// ...
 // CSV 가져오기
 function importWords(event) {
     const file = event.target.files[0];
@@ -323,23 +326,6 @@ function resetApp() {
     }
 }
 
-document.getElementById('version-info').addEventListener('click', () => {
-    versionTapCount++;
-    
-    if (versionTapCount === 1) {
-        versionTapTimer = setTimeout(() => {
-            versionTapCount = 0;
-        }, 3000);
-    }
-    
-    if (versionTapCount === 5) {
-        clearTimeout(versionTapTimer);
-        versionTapCount = 0;
-        showScreen('therapist-screen');
-        showStats();
-    }
-});
-
 // 일괄 단어 추가
 function bulkAddWords() {
     const textarea = document.getElementById('bulk-words');
@@ -364,13 +350,11 @@ function generateShareCode() {
         date: new Date().toISOString()
     };
     
-    // 간단한 인코딩
     const code = btoa(JSON.stringify(data)).substr(0, 8).toUpperCase();
     
     document.getElementById('share-code').value = code;
     document.getElementById('share-code-display').style.display = 'block';
     
-    // 클립보드 복사
     document.getElementById('share-code').onclick = function() {
         this.select();
         document.execCommand('copy');
