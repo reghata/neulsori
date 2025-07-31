@@ -18,181 +18,150 @@
         </div>
     </div>
 
-    <!-- 메인 화면 -->
-    <div id="main-screen" class="screen">
+    <!-- 홈 화면 (새로 추가) -->
+    <div id="home-screen" class="screen">
         <header>
             <div>
-                <h1 class="logo">늘소리</h1>
+                <h1 class="logo">
+                    <img src="assets/logo.png" alt="늘">
+                    <span>소리</span>
+                </h1>
             </div>
-            <div>
-                <!-- 빈 공간 -->
-            </div>
+            <div></div>
             <div>
                 <button class="icon-btn" onclick="showScreen('settings-screen')">⚙️</button>
             </div>
         </header>
-        
         <div class="main-menu">
-            <button class="menu-btn primary" onclick="showScreen('speak-screen')">
+            <button class="menu-btn" onclick="showScreen('conversation-screen')">
                 <span class="icon">🗣️</span>
-                <span>말하기</span>
+                <span>대화</span>
             </button>
-            
-            <button class="menu-btn" onclick="showScreen('favorites-screen')">
-                <span class="icon">⭐</span>
-                <span>즐겨찾기</span>
+            <button class="menu-btn" onclick="showScreen('practice-list-screen', 'reading')">
+                <span class="icon">📖</span>
+                <span>읽기 연습</span>
             </button>
-            
-            <button class="menu-btn" onclick="showScreen('all-words-screen')">
-                <span class="icon">📝</span>
-                <span>모든 단어</span>
+            <button class="menu-btn" onclick="showScreen('practice-list-screen', 'shadowing')">
+                <span class="icon">🎙️</span>
+                <span>따라말하기 연습</span>
             </button>
         </div>
     </div>
 
-    <!-- 말하기 화면 -->
-    <div id="speak-screen" class="screen">
+    <!-- 대화 화면 (기존 메인 화면) -->
+    <div id="conversation-screen" class="screen">
         <header>
             <div>
-                <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
+                <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
             </div>
             <div>
-                <h2>말하기</h2>
+                <h2>대화</h2>
             </div>
-            <div>
-                <!-- 빈 공간 -->
-            </div>
-        </header>
-        
-        <div class="word-container" id="speak-word-list">
-            <!-- 단어들이 여기 표시됨 -->
-        </div>
-        
-        <button class="fab" onclick="addWord()">+</button>
-    </div>
-
-    <!-- 즐겨찾기 화면 -->
-    <div id="favorites-screen" class="screen">
-        <header>
-            <div>
-                <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
-            </div>
-            <div>
-                <h2>즐겨찾기</h2>
-            </div>
-            <div>
-                <!-- 빈 공간 -->
-            </div>
-        </header>
-        
-        <div class="word-container" id="favorites-word-list">
-            <!-- 즐겨찾기 단어들이 여기 표시됨 -->
-        </div>
-    </div>
-
-    <!-- 모든 단어 화면 -->
-    <div id="all-words-screen" class="screen">
-        <header>
-            <div>
-                <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
-            </div>
-            <div>
-                <h2>모든 단어</h2>
-            </div>
-            <div>
+            <div class="header-icons">
                 <button class="icon-btn" id="edit-mode-btn" onclick="toggleEditMode()">✏️</button>
             </div>
         </header>
-        
         <div class="sort-toggle">
             <button id="sort-alpha" class="active" onclick="changeSortOrder('alphabet')">ㄱㄴㄷ순</button>
+            <button id="sort-fav" onclick="changeSortOrder('favorites')">즐겨찾기</button>
             <button id="sort-freq" onclick="changeSortOrder('frequency')">자주 사용순</button>
         </div>
-        
-        <div class="word-container" id="all-words-list">
-            <!-- 모든 단어들이 여기 표시됨 -->
-        </div>
-        
+        <div class="word-container" id="word-list-container"></div>
         <button class="fab" onclick="addWord()">+</button>
+    </div>
+
+    <!-- 연습 단어 선택 화면 (새로 추가) -->
+    <div id="practice-list-screen" class="screen">
+        <header>
+            <div>
+                <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
+            </div>
+            <div>
+                <h2 id="practice-list-title">연습 단어 선택</h2>
+            </div>
+            <div></div>
+        </header>
+        <div class="word-container" id="practice-word-list-container"></div>
+    </div>
+
+    <!-- 연습 화면 (공통, 새로 추가) -->
+    <div id="practice-screen" class="screen">
+        <header>
+            <div>
+                <button class="icon-btn" onclick="showScreen('practice-list-screen')">←</button>
+            </div>
+            <div>
+                <h2 id="practice-title">연습</h2>
+            </div>
+            <div></div>
+        </header>
+        <div class="practice-container">
+            <div class="practice-word-card">
+                <p>목표 단어</p>
+                <h3 id="target-word-display">안녕하세요</h3>
+            </div>
+            <div id="listen-button-container" style="display: none;">
+                <button class="practice-btn" onclick="speak(practiceWord.text)">
+                    <span class="icon">🔊</span>
+                    <span>먼저 들어보기</span>
+                </button>
+            </div>
+            <div class="mic-button-container">
+                <button id="mic-btn" class="mic-btn" onclick="startRecognition()">
+                    <span class="icon">🎤</span>
+                </button>
+                <p id="mic-status">버튼을 누르고 말씀하세요</p>
+            </div>
+            <div class="practice-result-card">
+                <p>나의 발음</p>
+                <h3 id="recognized-text-display">-</h3>
+                <p class="similarity-score">정확도: <span id="similarity-score-display">0%</span></p>
+            </div>
+        </div>
     </div>
 
     <!-- 설정 화면 -->
     <div id="settings-screen" class="screen">
         <header>
             <div>
-                <button class="icon-btn" onclick="showScreen('main-screen')">←</button>
+                <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
             </div>
-            <div>
-                <h2>설정</h2>
-            </div>
-            <div>
-                <!-- 빈 공간 -->
-            </div>
+            <div><h2>설정</h2></div>
+            <div></div>
         </header>
-        
         <div style="max-width: 600px; margin: 0 auto;">
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>글자 크기</h3>
-                <!-- data-setting-value 속성 추가 -->
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button data-setting-value="normal" onclick="changeFontSize('normal', event)">보통</button>
-                    <button data-setting-value="large" onclick="changeFontSize('large', event)">크게</button>
-                    <button data-setting-value="xlarge" onclick="changeFontSize('xlarge', event)">아주 크게</button>
+                    <button data-setting-value="normal" onclick="changeFontSize('normal')">보통</button>
+                    <button data-setting-value="large" onclick="changeFontSize('large')">크게</button>
+                    <button data-setting-value="xlarge" onclick="changeFontSize('xlarge')">아주 크게</button>
                 </div>
             </div>
-
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>말하기 속도</h3>
-                <!-- data-setting-value 속성 추가 -->
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button data-setting-value="normal" onclick="changeSpeechRate('normal', event)">보통</button>
-                    <button data-setting-value="slow" onclick="changeSpeechRate('slow', event)">느리게</button>
-                    <button data-setting-value="verySlow" onclick="changeSpeechRate('verySlow', event)">아주 느리게</button>
+                    <button data-setting-value="normal" onclick="changeSpeechRate('normal')">보통</button>
+                    <button data-setting-value="slow" onclick="changeSpeechRate('slow')">느리게</button>
+                    <button data-setting-value="verySlow" onclick="changeSpeechRate('verySlow')">아주 느리게</button>
                 </div>
-                <p style="text-align: center; color: #666; margin-top: 10px; font-size: 0.9em;">
-                    버튼을 누르면 "안녕하세요"로 속도를 확인할 수 있습니다
-                </p>
             </div>
-            
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>음성 선택</h3>
-                <!-- data-setting-value 속성 추가 -->
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button data-setting-value="female" onclick="changeVoiceGender('female', event)">여성 음성</button>
-                    <button data-setting-value="male" onclick="changeVoiceGender('male', event)">남성 음성</button>
+                    <button data-setting-value="female" onclick="changeVoiceGender('female')">여성 음성</button>
+                    <button data-setting-value="male" onclick="changeVoiceGender('male')">남성 음성</button>
                 </div>
-                <p style="text-align: center; color: #666; margin-top: 10px; font-size: 0.9em;">
-                    선택하면 "안녕하세요"로 미리 들어볼 수 있습니다
+            </div>
+            <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
+                <h3>정보</h3>
+                <p id="version-info" style="color: #999; text-align: center; padding: 20px; cursor: pointer;">
+                    늘소리 v1.0.0
                 </p>
             </div>
-
-            <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
-                <h3>데이터 관리</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <button onclick="document.getElementById('file-input').click()">
-                        📥 단어 가져오기 (CSV)
-                    </button>
-                    <input type="file" id="file-input" accept=".csv,.txt" style="display: none;" onchange="importWords(event)">
-                    
-                    <button onclick="exportWords()">📤 단어 내보내기</button>
-                    <button onclick="resetApp()" style="background: #f44336; color: white;">🔄 초기화</button>
-                </div>
-            </div>
-        </div>
-
-        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
-            <h3>정보</h3>
-            <p id="version-info" style="color: #999; text-align: center; padding: 20px; cursor: pointer;">
-                늘소리 v1.0.0
-            </p>
-        </div>
-        
-        <!-- 디버깅 정보 표시 영역 추가 -->
-        <div id="debug-info" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999;">
-            디버그 정보
         </div>
     </div>
-
+    
     <!-- 단어 추가 모달 -->
     <div id="add-word-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px;">
@@ -204,46 +173,32 @@
             </div>
         </div>
     </div>
-
+    
     <!-- 치료사 모드 화면 -->
     <div id="therapist-screen" class="screen">
         <header>
-            <div>
-                <button class="icon-btn" onclick="showScreen('settings-screen')">←</button>
-            </div>
-            <div>
-                <h2>치료사 모드</h2>
-            </div>
-            <div>
-                <!-- 빈 공간 -->
-            </div>
+            <div><button class="icon-btn" onclick="showScreen('settings-screen')">←</button></div>
+            <div><h2>치료사 모드</h2></div>
+            <div></div>
         </header>
-        
         <div style="max-width: 600px; margin: 0 auto;">
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>빠른 단어 추가</h3>
-                <textarea id="bulk-words" placeholder="여러 단어를 한 줄씩 입력하세요" 
-                    style="width: 100%; height: 150px; padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 5px;"></textarea>
+                <textarea id="bulk-words" placeholder="여러 단어를 한 줄씩 입력하세요" style="width: 100%; height: 150px; padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 5px;"></textarea>
                 <button onclick="bulkAddWords()" style="margin-top: 10px; width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 10px; font-size: 18px;">일괄 추가</button>
             </div>
-            
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
-                <h3>설정 공유</h3>
-                <button onclick="generateShareCode()" style="width: 100%; padding: 15px; background: #2196F3; color: white; border: none; border-radius: 10px; font-size: 18px;">공유 코드 생성</button>
-                <div id="share-code-display" style="margin-top: 20px; display: none;">
-                    <input type="text" id="share-code" readonly 
-                        style="width: 100%; padding: 15px; font-size: 20px; text-align: center; border: 2px solid #ddd; border-radius: 5px; background: #f5f5f5;">
-                    <p style="text-align: center; color: #666; margin-top: 10px;">
-                        이 코드를 환자에게 전달하세요
-                    </p>
+                <h3>데이터 관리</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <button onclick="document.getElementById('file-input').click()">📥 단어 가져오기 (CSV)</button>
+                    <input type="file" id="file-input" accept=".csv,.txt" style="display: none;" onchange="importWords(event)">
+                    <button onclick="exportWords()">📤 단어 내보내기</button>
+                    <button onclick="resetApp()" style="background: #f44336; color: white;">🔄 초기화</button>
                 </div>
             </div>
-            
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>사용 통계</h3>
-                <div id="stats-display" style="line-height: 1.8;">
-                    <!-- 통계가 여기 표시됨 -->
-                </div>
+                <div id="stats-display" style="line-height: 1.8;"></div>
             </div>
         </div>
     </div>
