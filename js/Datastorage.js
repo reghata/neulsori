@@ -1,5 +1,4 @@
-// js/Datastorage.js
-
+// 데이터 저장/관리를 담당하는 모듈
 class DataStorage {
     constructor() {
         this.data = this.loadData();
@@ -47,6 +46,7 @@ class DataStorage {
     
     // 단어 추가
     addWord(text) {
+        // 중복 체크
         const exists = this.data.words.find(w => w.text === text);
         if (exists) {
             return { success: false, word: exists };
@@ -106,8 +106,10 @@ class DataStorage {
         this.saveData();
     }
 
+    // deleteWord 메서드 추가
     deleteWord(id) {
         this.data.words = this.data.words.filter(w => w.id !== id);
         this.saveData();
     }
+
 }

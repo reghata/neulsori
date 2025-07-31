@@ -1,4 +1,4 @@
-
+/* ===== 기본 설정 ===== */
 * {
     margin: 0;
     padding: 0;
@@ -80,16 +80,19 @@ header h2 {
     text-align: center;
 }
 
-/* 아이콘 버튼 크기 조정 */
+/* 아이콘 버튼 크기 조정 (수정) */
 .icon-btn {
     background: none;
     border: none;
-    font-size: 1.5em;
+    font-size: 1.2em; /* 크기 축소 */
     cursor: pointer;
     padding: 10px;
-    width: auto;  /* 너비 자동 */
-    min-width: 44px;  /* 최소 터치 영역 */
-    max-width: 60px;  /* 최대 너비 제한 */
+    width: 44px;    /* 너비 고정 */
+    height: 44px;   /* 높이 고정 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 /* ===== 메인 메뉴 ===== */
@@ -250,16 +253,23 @@ header h2 {
     padding: 15px;
     margin: 5px 0;
     border: none;
-    background: #2196F3;
+    background: #2196F3; /* 기본 파란색 */
     color: white;
     border-radius: 10px;
     font-size: 0.9em;
     cursor: pointer;
+    transition: background-color 0.3s; /* 부드러운 색상 전환 효과 */
 }
 
 #settings-screen button:active {
     transform: scale(0.98);
 }
+
+/* 활성화된 설정 버튼 (초록색) */
+#settings-screen button.active {
+    background: #4CAF50;
+}
+
 
 /* ===== 기본 버튼 스타일 ===== */
 button {
@@ -306,13 +316,4 @@ button {
     .word-item {
         font-size: 1.2em;
     }
-}
-/* 설정 버튼 호버 효과 */
-#settings-screen button:hover {
-    opacity: 0.9;
-}
-
-/* 활성화된 설정 버튼 */
-#settings-screen button.active {
-    background: #4CAF50 !important;
 }

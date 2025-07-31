@@ -1,4 +1,4 @@
-
+// 전역 변수
 let storage;
 let currentSortOrder = 'alphabet';
 let speechRate = 0.85;
@@ -27,44 +27,29 @@ window.onload = function() {
             });
     }
     
-    // 음성 로드 추가
+    // 음성 로드
     loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
     
     // 2초 후 메인 화면으로
     setTimeout(() => {
         const splashScreen = document.getElementById('splash-screen');
         if (splashScreen) {
-            splashScreen.style.display = 'none';
             splashScreen.classList.remove('active');
         }
         
         const mainScreen = document.getElementById('main-screen');
         if (mainScreen) {
-            mainScreen.style.display = 'block';
             mainScreen.classList.add('active');
         }
     }, 2000);
     
-    // 치료사 모드 이벤트 리스너 추가 (여기에!)
+    // 치료사 모드 이벤트 리스너
     const versionInfo = document.getElementById('version-info');
     if (versionInfo) {
-        versionInfo.addEventListener('click', () => {
-            versionTapCount++;
-            
-            if (versionTapCount === 1) {
-                versionTapTimer = setTimeout(() => {
-                    versionTapCount = 0;
-                }, 3000);
-            }
-            
-            if (versionTapCount === 5) {
-                clearTimeout(versionTapTimer);
-                versionTapCount = 0;
-                showScreen('therapist-screen');
-                showStats();
-            }
-        });
+        versionInfo.addEventListener('click', handleVersionClick);
     }
 };
 
@@ -88,111 +73,66 @@ function handleVersionClick() {
 // 음성 목록 로드
 function loadVoices() {
     voices = window.speechSynthesis.getVoices();
-    
-    // 한국어 음성만 필터링
-    const koreanVoices = voices.filter(voice => 
-        voice.lang === 'ko-KR' || voice.lang.startsWith('ko')
-    );
-    
+    const koreanVoices = voices.filter(voice => voice.lang === 'ko-KR' || voice.lang.startsWith('ko'));
     console.log('사용 가능한 한국어 음성:', koreanVoices.map(v => v.name));
-    
-    // 초기 음성 선택
-    selectVoiceByGender(voiceGender);
+    selectVoiceByGender(storage.getSettings().voiceGender);
 }
 
 // 성별에 따른 음성 선택
 function selectVoiceByGender(gender) {
-    const koreanVoices = voices.filter(voice => 
-        voice.lang === 'ko-KR' || voice.lang.startsWith('ko')
-    );
+    const koreanVoices = voices.filter(voice => voice.lang === 'ko-KR' || voice.lang.startsWith('ko'));
+    if (koreanVoices.length === 0) return;
     
-    if (koreanVoices.length === 0) {
-        console.log('한국어 음성이 없습니다');
-        return;
-    }
-    
-    // 성별 키워드로 음성 찾기
     const genderKeywords = {
-        female: ['female', '여성', '여자', 'woman', 'Female', '은영', '유나', 'Yuna', 'Sun-Hi'],
-        male: ['male', '남성', '남자', 'man', 'Male', '민기', '준호', 'Junho', 'InJoon']
+        female: ['female', '여성', '여자', 'woman', 'yuna', 'sun-hi'],
+        male: ['male', '남성', '남자', 'man', 'junho', 'injoon']
     };
     
-    // 성별에 맞는 음성 찾기
-    const preferredVoice = koreanVoices.find(voice => {
-        const voiceName = voice.name.toLowerCase();
-        return genderKeywords[gender].some(keyword => 
-            voiceName.includes(keyword.toLowerCase())
-        );
-    });
+    const preferredVoice = koreanVoices.find(voice => 
+        genderKeywords[gender].some(keyword => voice.name.toLowerCase().includes(keyword))
+    );
     
-    if (preferredVoice) {
-        selectedVoiceIndex = voices.indexOf(preferredVoice);
-        console.log(`${gender} 음성 선택:`, preferredVoice.name);
-    } else {
-        // 성별 음성을 못 찾으면 첫 번째 한국어 음성 사용
-        selectedVoiceIndex = voices.indexOf(koreanVoices[0]);
-        console.log('기본 한국어 음성 사용:', koreanVoices[0].name);
-    }
+    selectedVoiceIndex = voices.indexOf(preferredVoice || koreanVoices[0]);
+    console.log(`${gender} 음성 선택:`, voices[selectedVoiceIndex].name);
 }
 
 // 화면 전환
 function showScreen(screenId) {
-    // 모든 화면 숨기기
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
-    });
-    
-    // 선택한 화면 보이기
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
-    // 설정 다시 적용 (이 부분 추가!)
-    applySettings();
-    
-    // 화면별 데이터 로드
     if (screenId === 'speak-screen') {
-        displayWords('speak-word-list', storage.getAllWords());
+        displayWords('speak-word-list', storage.getSortedWords('alphabet'));
     } else if (screenId === 'favorites-screen') {
         displayWords('favorites-word-list', storage.getFavoriteWords());
     } else if (screenId === 'all-words-screen') {
         displayWords('all-words-list', storage.getSortedWords(currentSortOrder));
-    }
-        // 설정 화면일 때 현재 설정 표시
-    if (screenId === 'settings-screen') {
+    } else if (screenId === 'settings-screen') {
         highlightCurrentSettings();
     }
 }
 
-
-// speak 함수 수정
+// 음성 재생
 function speak(text, wordId) {
-    if (wordId) {
-        storage.incrementUseCount(wordId);
-    }
+    if (wordId) storage.incrementUseCount(wordId);
     
     window.speechSynthesis.cancel();
-    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ko-KR';
     utterance.rate = speechRate;
-    
-    // 선택된 음성 사용
-    if (voices.length > 0 && selectedVoiceIndex < voices.length) {
-        utterance.voice = voices[selectedVoiceIndex];
-    }
+    if (voices.length > 0) utterance.voice = voices[selectedVoiceIndex];
     
     utterance.onstart = () => {
-        if (currentPlayingItem) {
-            currentPlayingItem.classList.remove('playing');
+        if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
+        const item = Array.from(document.querySelectorAll('.word-item')).find(el => el.querySelector('.word-text')?.textContent === text);
+        if (item) {
+            item.classList.add('playing');
+            currentPlayingItem = item;
         }
-        
-        const wordItems = document.querySelectorAll('.word-item');
-        wordItems.forEach(item => {
-            if (item.querySelector('.word-text') && 
-                item.querySelector('.word-text').textContent === text) {
-                item.classList.add('playing');
-                currentPlayingItem = item;
-            }
-        });
+    };
+    utterance.onend = () => {
+        if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
+        currentPlayingItem = null;
     };
     
     window.speechSynthesis.speak(utterance);
@@ -200,196 +140,108 @@ function speak(text, wordId) {
 
 // 즐겨찾기 토글
 function toggleFavorite(wordId, event) {
-    event.stopPropagation();  // 클릭 이벤트 전파 중지
+    event.stopPropagation();
     storage.toggleFavorite(wordId);
-    
-    // 현재 화면 새로고침
-    const currentScreen = document.querySelector('.screen.active').id;
-    showScreen(currentScreen);
+    const currentScreenId = document.querySelector('.screen.active').id;
+    showScreen(currentScreenId);
 }
 
-// 새 단어 추가
-// addWord 함수를 모달을 사용하도록 수정
+// 단어 추가 모달 열기
 function addWord() {
-    document.getElementById('add-word-modal').style.display = 'block';
-    document.getElementById('new-word-input').focus();
-    
-    // 엔터키로도 추가 가능
-    document.getElementById('new-word-input').onkeypress = function(e) {
-        if (e.key === 'Enter') {
-            confirmAddWord();
-        }
-    };
+    const modal = document.getElementById('add-word-modal');
+    modal.style.display = 'block';
+    const input = document.getElementById('new-word-input');
+    input.focus();
+    input.onkeypress = e => { if (e.key === 'Enter') confirmAddWord(); };
 }
 
-// 새로운 함수들 추가
+// 단어 추가 확인
 function confirmAddWord() {
     const input = document.getElementById('new-word-input');
     const text = input.value.trim();
-    
-    if (!text) {
-        alert('단어를 입력해주세요!');
-        return;
-    }
+    if (!text) return alert('단어를 입력해주세요!');
     
     const result = storage.addWord(text);
-    
-    if (result.success) {
-        closeAddWordModal();
-        // 현재 화면 새로고침
-        const currentScreen = document.querySelector('.screen.active').id;
-        showScreen(currentScreen);
-        
-        // 추가된 단어 바로 재생
-        setTimeout(() => {
-            speak(result.word.text, result.word.id);
-        }, 100);
-    } else {
-        // 중복 단어 처리
-        closeAddWordModal();
-        speak(result.word.text, result.word.id);
-        
-        // 해당 단어로 스크롤
-        setTimeout(() => {
-            const wordItems = document.querySelectorAll('.word-item');
-            wordItems.forEach(item => {
-                if (item.querySelector('span').textContent === result.word.text) {
-                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            });
-        }, 100);
-    }
+    closeAddWordModal();
+    showScreen(document.querySelector('.screen.active').id);
+    setTimeout(() => speak(result.word.text, result.word.id), 100);
 }
 
+// 단어 추가 모달 닫기
 function closeAddWordModal() {
-    document.getElementById('add-word-modal').style.display = 'none';
+    const modal = document.getElementById('add-word-modal');
+    modal.style.display = 'none';
     document.getElementById('new-word-input').value = '';
 }
-
-// 모달 외부 클릭 시 닫기
-document.getElementById('add-word-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeAddWordModal();
-    }
-});
-
 
 // 정렬 순서 변경
 function changeSortOrder(sortBy) {
     currentSortOrder = sortBy;
-    
-    // 버튼 활성화 상태 변경
     document.getElementById('sort-alpha').classList.toggle('active', sortBy === 'alphabet');
     document.getElementById('sort-freq').classList.toggle('active', sortBy === 'frequency');
-    
-    // 단어 목록 새로고침
     displayWords('all-words-list', storage.getSortedWords(currentSortOrder));
 }
 
+// 글자 크기 변경
 function changeFontSize(size, event) {
-    document.body.classList.remove('font-normal', 'font-large', 'font-xlarge');
-    document.body.classList.add(`font-${size}`);
+    document.body.className = `font-${size}`;
     storage.updateSettings({ fontSize: size });
-    
-    if (!event || !event.target) return;
-    
-    const buttons = event.target.parentElement.querySelectorAll('button');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    highlightCurrentSettings();
 }
 
-// '재생 중...' 텍스트가 나오지 않도록 수정된 함수
+// 말하기 속도 변경
 function changeSpeechRate(rate, event) {
     const rates = { 'normal': 1.0, 'slow': 0.85, 'verySlow': 0.75 };
     speechRate = rates[rate];
     storage.updateSettings({ speechRate: rate });
-
-    // 시각적 피드백 업데이트 (색상 변경)
-    const clickedButton = event.target;
-    const buttons = clickedButton.parentElement.querySelectorAll('button');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    clickedButton.classList.add('active');
-
-    // 샘플 음성 재생 (버튼 텍스트 변경 없음)
+    highlightCurrentSettings();
     speak('안녕하세요');
 }
 
+// 음성 성별 변경
+function changeVoiceGender(gender, event) {
+    storage.updateSettings({ voiceGender: gender });
+    selectVoiceByGender(gender);
+    highlightCurrentSettings();
+    speak('안녕하세요');
+}
+
+// 현재 설정값에 맞게 버튼 활성화
 function highlightCurrentSettings() {
     const settings = storage.getSettings();
-    const settingsDivs = document.querySelectorAll('#settings-screen > div > div');
-
-    settingsDivs.forEach(div => {
-        const h3 = div.querySelector('h3');
-        if (!h3) return;
+    
+    document.querySelectorAll('[data-setting-value]').forEach(btn => {
+        const key = btn.parentElement.previousElementSibling.textContent;
+        let settingKey;
+        if (key === '글자 크기') settingKey = 'fontSize';
+        else if (key === '말하기 속도') settingKey = 'speechRate';
+        else if (key === '음성 선택') settingKey = 'voiceGender';
         
-        const buttons = div.querySelectorAll('button');
-        buttons.forEach(btn => btn.classList.remove('active'));
-
-        let activeBtn;
-        if (h3.textContent === '글자 크기') {
-            const sizeMap = { 'normal': '보통', 'large': '크게', 'xlarge': '아주 크게' };
-            activeBtn = Array.from(buttons).find(b => b.textContent === sizeMap[settings.fontSize]);
-        } else if (h3.textContent === '말하기 속도') {
-            if (settings.speechRate === 'normal') activeBtn = Array.from(buttons).find(b => b.onclick.toString().includes("'normal'"));
-            if (settings.speechRate === 'slow') activeBtn = Array.from(buttons).find(b => b.onclick.toString().includes("'slow'"));
-            if (settings.speechRate === 'verySlow') activeBtn = Array.from(buttons).find(b => b.onclick.toString().includes("'verySlow'"));
-        } else if (h3.textContent === '음성 선택') {
-            const genderMap = { 'female': '여성 음성', 'male': '남성 음성' };
-            activeBtn = Array.from(buttons).find(b => b.textContent === genderMap[settings.voiceGender]);
-        }
-        
-        if (activeBtn) {
-            activeBtn.classList.add('active');
+        if (settingKey) {
+            btn.classList.toggle('active', btn.dataset.settingValue === settings[settingKey]);
         }
     });
 }
 
-function changeVoiceGender(gender, event) {
-    voiceGender = gender;
-    storage.updateSettings({ voiceGender: gender });
-    selectVoiceByGender(gender);
-    
-    if (event && event.target) {
-        const buttons = event.target.parentElement.querySelectorAll('button');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-    
-    speak('안녕하세요');
-}
-
-// 설정 적용
+// 저장된 설정 적용
 function applySettings() {
     const settings = storage.getSettings();
-    
-    // 글자 크기
     document.body.className = `font-${settings.fontSize}`;
-    
-    // 말하기 속도
-    const rates = {
-        'normal': 1.0,
-        'slow': 0.85,
-        'verySlow': 0.75
-    };
-    speechRate = rates[settings.speechRate] || 0.85;
-    
-    // 음성 성별 (추가)
+    const rates = { 'normal': 1.0, 'slow': 0.85, 'verySlow': 0.75 };
+    speechRate = rates[settings.speechRate] || 0.75;
     voiceGender = settings.voiceGender || 'female';
     selectVoiceByGender(voiceGender);
 }
-
 
 // 편집 모드 토글
 function toggleEditMode() {
     isEditMode = !isEditMode;
     document.getElementById('edit-mode-btn').textContent = isEditMode ? '✓' : '✏️';
     document.getElementById('all-words-list').classList.toggle('edit-mode', isEditMode);
-    
-    // 단어 목록 다시 표시
     displayWords('all-words-list', storage.getSortedWords(currentSortOrder));
 }
 
-// displayWords 함수 수정 (삭제 버튼 추가)
+// 단어 목록 표시
 function displayWords(containerId, words) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -398,33 +250,19 @@ function displayWords(containerId, words) {
         const wordItem = document.createElement('div');
         wordItem.className = 'word-item';
         
-        // 편집 모드가 아닐 때는 기존과 동일
         if (!isEditMode || containerId !== 'all-words-list') {
-            wordItem.onclick = function(e) {
-                if (!e.target.classList.contains('favorite-btn')) {
-                    speak(word.text, word.id);
-                }
+            wordItem.onclick = e => {
+                if (!e.target.classList.contains('favorite-btn')) speak(word.text, word.id);
             };
-            
-            wordItem.innerHTML = `
-                <span class="word-text">${word.text}</span>
-                <button class="favorite-btn" onclick="toggleFavorite(${word.id}, event)">
-                    ${word.isFavorite ? '⭐' : '☆'}
-                </button>
-            `;
+            wordItem.innerHTML = `<span class="word-text">${word.text}</span><button class="favorite-btn" onclick="toggleFavorite(${word.id}, event)">${word.isFavorite ? '⭐' : '☆'}</button>`;
         } else {
-            // 편집 모드일 때는 삭제 버튼 표시
-            wordItem.innerHTML = `
-                <span class="word-text">${word.text}</span>
-                <button class="delete-btn" onclick="deleteWord(${word.id})">🗑️</button>
-            `;
+            wordItem.innerHTML = `<span class="word-text">${word.text}</span><button class="delete-btn" onclick="deleteWord(${word.id})">🗑️</button>`;
         }
-        
         container.appendChild(wordItem);
     });
 }
 
-// 단어 삭제 함수 추가
+// 단어 삭제
 function deleteWord(wordId) {
     const word = storage.data.words.find(w => w.id === wordId);
     if (confirm(`"${word.text}"를 삭제하시겠습니까?`)) {
