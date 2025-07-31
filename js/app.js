@@ -5,7 +5,7 @@ let speechRate = 0.85;
 let currentPlayingItem = null;
 let isEditMode = false;
 let voices = [];
-let selectedVoiceIndex = 0;
+let selectedVoiceIndex = -1; // -1로 초기화하여 음성이 선택되지 않았음을 명확히 함
 let voiceGender = 'female';
 let versionTapCount = 0;
 let versionTapTimer;
@@ -28,10 +28,11 @@ window.onload = function() {
     }
     
     // 음성 로드
-    loadVoices();
+    // 비동기적으로 음성 목록이 로드되므로, 이벤트 리스너를 사용합니다.
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
     }
+    loadVoices(); // 초기 로드 시도
     
     // 2초 후 메인 화면으로
     setTimeout(() => {
@@ -73,18 +74,30 @@ function handleVersionClick() {
 // 음성 목록 로드
 function loadVoices() {
     voices = window.speechSynthesis.getVoices();
-    const koreanVoices = voices.filter(voice => voice.lang === 'ko-KR' || voice.lang.startsWith('ko'));
-    console.log('사용 가능한 한국어 음성:', koreanVoices.map(v => v.name));
-    selectVoiceByGender(storage.getSettings().voiceGender);
+    if (voices.length > 0) {
+        console.log('음성 목록이 성공적으로 로드되었습니다.');
+        selectVoiceByGender(storage.getSettings().voiceGender);
+    }
 }
 
 // 성별에 따른 음성 선택
 function selectVoiceByGender(gender) {
-    const koreanVoices = voices.filter(voice => voice.lang === 'ko-KR' || voice.lang.startsWith('ko'));
-    if (koreanVoices.length === 0) return;
+    // 함수 호출 시점의 최신 음성 목록을 가져옵니다.
+    const availableVoices = window.speechSynthesis.getVoices();
+    if (availableVoices.length === 0) {
+        console.warn("음성 목록을 사용할 수 없습니다. 잠시 후 다시 시도됩니다.");
+        return;
+    }
+    
+    const koreanVoices = availableVoices.filter(voice => voice.lang === 'ko-KR' || voice.lang.startsWith('ko'));
+    if (koreanVoices.length === 0) {
+        console.error('사용 가능한 한국어 음성을 찾을 수 없습니다.');
+        selectedVoiceIndex = -1;
+        return;
+    }
     
     const genderKeywords = {
-        female: ['female', '여성', '여자', 'woman', 'yuna', 'sun-hi'],
+        female: ['female', '여성', '여자', 'woman', 'yuna', 'sun-hi', 'heami'],
         male: ['male', '남성', '남자', 'man', 'junho', 'injoon']
     };
     
@@ -92,8 +105,14 @@ function selectVoiceByGender(gender) {
         genderKeywords[gender].some(keyword => voice.name.toLowerCase().includes(keyword))
     );
     
-    selectedVoiceIndex = voices.indexOf(preferredVoice || koreanVoices[0]);
-    console.log(`${gender} 음성 선택:`, voices[selectedVoiceIndex]?.name);
+    const finalVoice = preferredVoice || koreanVoices[0];
+    selectedVoiceIndex = availableVoices.indexOf(finalVoice);
+    
+    if (preferredVoice) {
+        console.log(`성공: ${gender} 음성 선택됨 - ${finalVoice.name}`);
+    } else {
+        console.warn(`경고: 선호하는 ${gender} 음성을 찾지 못했습니다. 기본 음성(${finalVoice.name})을 사용합니다.`);
+    }
 }
 
 // 화면 전환
@@ -113,14 +132,20 @@ function showScreen(screenId) {
 }
 
 // 음성 재생
-function speak(text, wordId) {
+function speak(text, wordId, customRate = null) {
     if (wordId) storage.incrementUseCount(wordId);
     
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ko-KR';
-    utterance.rate = speechRate;
-    if (voices.length > 0) utterance.voice = voices[selectedVoiceIndex];
+    utterance.rate = customRate !== null ? customRate : speechRate;
+
+    const allVoices = window.speechSynthesis.getVoices();
+    if (allVoices.length > 0 && selectedVoiceIndex !== -1) {
+        utterance.voice = allVoices[selectedVoiceIndex];
+    } else {
+        console.warn('선택된 음성을 적용할 수 없어 기본 음성으로 재생됩니다.');
+    }
     
     utterance.onstart = () => {
         if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
@@ -192,10 +217,13 @@ function changeFontSize(size, event) {
 // 말하기 속도 변경
 function changeSpeechRate(rate, event) {
     const rates = { 'normal': 1.0, 'slow': 0.85, 'verySlow': 0.75 };
-    speechRate = rates[rate];
+    const newRateValue = rates[rate];
+    
+    speechRate = newRateValue;
     storage.updateSettings({ speechRate: rate });
+    
     highlightCurrentSettings();
-    speak('안녕하세요');
+    speak('안녕하세요', null, newRateValue);
 }
 
 // 음성 성별 변경
@@ -272,8 +300,6 @@ function deleteWord(wordId) {
     }
 }
 
-// (데이터 관리, 치료사 모드 관련 함수들은 기존과 동일하게 유지)
-// ...
 // CSV 가져오기
 function importWords(event) {
     const file = event.target.files[0];
