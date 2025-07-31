@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // 전역 변수
 let storage;
 let currentSortOrder = 'alphabet';
@@ -293,55 +294,25 @@ function changeFontSize(size, event) {
     
     if (!event || !event.target) return;
     
-    // 모든 형제 버튼의 active 클래스를 제거하고, 클릭된 버튼에만 추가합니다.
     const buttons = event.target.parentElement.querySelectorAll('button');
     buttons.forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
 }
 
-// app.js
-
+// '재생 중...' 텍스트가 나오지 않도록 수정된 함수
 function changeSpeechRate(rate, event) {
     const rates = { 'normal': 1.0, 'slow': 0.85, 'verySlow': 0.75 };
-    const rateToText = { 'normal': '보통', 'slow': '느리게', 'verySlow': '아주 느리게' };
-
     speechRate = rates[rate];
     storage.updateSettings({ speechRate: rate });
 
+    // 시각적 피드백 업데이트 (색상 변경)
     const clickedButton = event.target;
     const buttons = clickedButton.parentElement.querySelectorAll('button');
-
-    // 모든 버튼의 active 클래스를 지우고 텍스트를 원래대로 복구합니다.
-    buttons.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.onclick.toString().includes("'normal'")) btn.textContent = rateToText['normal'];
-        else if (btn.onclick.toString().includes("'slow'")) btn.textContent = rateToText['slow'];
-        else if (btn.onclick.toString().includes("'verySlow'")) btn.textContent = rateToText['verySlow'];
-    });
-
-    // 클릭된 버튼에만 active 클래스를 추가하고 텍스트를 변경합니다.
+    buttons.forEach(btn => btn.classList.remove('active'));
     clickedButton.classList.add('active');
-    clickedButton.textContent = '재생 중...';
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance('안녕하세요');
-    utterance.lang = 'ko-KR';
-    utterance.rate = speechRate;
-    if (voices.length > 0 && selectedVoiceIndex < voices.length) {
-        utterance.voice = voices[selectedVoiceIndex];
-    }
-
-    // 음성 재생이 끝나면 텍스트만 원래대로 복구합니다. (active 클래스는 유지)
-    utterance.onend = () => {
-        clickedButton.textContent = rateToText[rate];
-    };
-    
-    utterance.onerror = (e) => {
-        console.error('Speech synthesis error:', e);
-        clickedButton.textContent = rateToText[rate]; // 오류 발생 시에도 텍스트 복구
-    };
-
-    window.speechSynthesis.speak(utterance);
+    // 샘플 음성 재생 (버튼 텍스트 변경 없음)
+    speak('안녕하세요');
 }
 
 function highlightCurrentSettings() {
@@ -353,7 +324,6 @@ function highlightCurrentSettings() {
         if (!h3) return;
         
         const buttons = div.querySelectorAll('button');
-        // 먼저 모든 버튼의 active 클래스를 제거합니다.
         buttons.forEach(btn => btn.classList.remove('active'));
 
         let activeBtn;
@@ -361,8 +331,6 @@ function highlightCurrentSettings() {
             const sizeMap = { 'normal': '보통', 'large': '크게', 'xlarge': '아주 크게' };
             activeBtn = Array.from(buttons).find(b => b.textContent === sizeMap[settings.fontSize]);
         } else if (h3.textContent === '말하기 속도') {
-            const rateMap = { 'normal': '보통', 'slow': '느리게', 'verySlow': '아주 느리게' };
-            // 버튼 텍스트가 '재생 중...'일 수 있으므로, 저장된 설정으로 버튼을 찾습니다.
             if (settings.speechRate === 'normal') activeBtn = Array.from(buttons).find(b => b.onclick.toString().includes("'normal'"));
             if (settings.speechRate === 'slow') activeBtn = Array.from(buttons).find(b => b.onclick.toString().includes("'slow'"));
             if (settings.speechRate === 'verySlow') activeBtn = Array.from(buttons).find(b => b.onclick.toString().includes("'verySlow'"));
@@ -371,7 +339,6 @@ function highlightCurrentSettings() {
             activeBtn = Array.from(buttons).find(b => b.textContent === genderMap[settings.voiceGender]);
         }
         
-        // 해당하는 버튼에 active 클래스를 추가합니다.
         if (activeBtn) {
             activeBtn.classList.add('active');
         }

@@ -1,4 +1,5 @@
-// 데이터 저장/관리를 담당하는 모듈
+// js/Datastorage.js
+
 class DataStorage {
     constructor() {
         this.data = this.loadData();
@@ -11,7 +12,7 @@ class DataStorage {
             return JSON.parse(saved);
         }
         
-        // 초기 데이터
+        // 초기 데이터 (기본값 수정)
         return {
             words: [
                 { id: 1, text: '안녕하세요', isFavorite: false, useCount: 0 },
@@ -21,8 +22,8 @@ class DataStorage {
                 { id: 5, text: '아니요', isFavorite: false, useCount: 0 }
             ],
             settings: {
-                fontSize: 'large',
-                speechRate: 'slow',
+                fontSize: 'xlarge',      // '아주 크게'로 변경
+                speechRate: 'verySlow',  // '아주 느리게'로 변경
                 voiceGender: 'female'
             },
             nextId: 6
@@ -46,7 +47,6 @@ class DataStorage {
     
     // 단어 추가
     addWord(text) {
-        // 중복 체크
         const exists = this.data.words.find(w => w.text === text);
         if (exists) {
             return { success: false, word: exists };
@@ -106,10 +106,8 @@ class DataStorage {
         this.saveData();
     }
 
-    // deleteWord 메서드 추가
     deleteWord(id) {
         this.data.words = this.data.words.filter(w => w.id !== id);
         this.saveData();
     }
-
 }
