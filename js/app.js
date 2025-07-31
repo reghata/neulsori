@@ -265,9 +265,19 @@ function confirmAddWord() {
     const input = document.getElementById('new-word-input');
     const text = input.value.trim();
     if (!text) return alert('단어를 입력해주세요!');
+    
     const result = storage.addWord(text);
     closeAddWordModal();
-    changeSortOrder(currentSortOrder);
+    
+    // 현재 활성화된 화면에 따라 목록을 새로고침
+    const activeScreenId = document.querySelector('.screen.active').id;
+    if (activeScreenId === 'conversation-screen') {
+        changeSortOrder(currentSortOrder);
+    } else if (activeScreenId === 'practice-list-screen') {
+        // 'practice-list-screen'을 다시 로드하여 목록을 갱신
+        showScreen('practice-list-screen', currentPracticeMode);
+    }
+
     setTimeout(() => speak(result.word.text, result.word.id), 100);
 }
 
