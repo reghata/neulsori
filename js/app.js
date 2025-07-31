@@ -131,14 +131,14 @@ function showScreen(screenId) {
     }
 }
 
-// 음성 재생
-function speak(text, wordId, customRate = null) {
+// 음성 재생 (수정)
+function speak(text, wordId) {
     if (wordId) storage.incrementUseCount(wordId);
     
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ko-KR';
-    utterance.rate = customRate !== null ? customRate : speechRate;
+    utterance.rate = speechRate; // 항상 전역 변수 speechRate를 사용
 
     const allVoices = window.speechSynthesis.getVoices();
     if (allVoices.length > 0 && selectedVoiceIndex !== -1) {
@@ -214,16 +214,15 @@ function changeFontSize(size, event) {
     highlightCurrentSettings();
 }
 
-// 말하기 속도 변경
+// 말하기 속도 변경 (수정)
 function changeSpeechRate(rate, event) {
     const rates = { 'normal': 1.0, 'slow': 0.85, 'verySlow': 0.75 };
-    const newRateValue = rates[rate];
     
-    speechRate = newRateValue;
+    speechRate = rates[rate]; // 전역 변수 업데이트
     storage.updateSettings({ speechRate: rate });
     
     highlightCurrentSettings();
-    speak('안녕하세요', null, newRateValue);
+    speak('안녕하세요'); // customRate 없이 호출
 }
 
 // 음성 성별 변경
