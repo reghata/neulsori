@@ -1,7 +1,12 @@
 // 전역 변수
+const SPEECH_RATES = {
+    'normal': 1.0,
+    'slow': 0.7,
+    'verySlow': 0.5
+};
 let storage;
 let currentSortOrder = 'alphabet';
-let speechRate = 0.85;
+let speechRate = 1.0; // 기본 속도
 let currentPlayingItem = null;
 let isEditMode = false;
 let voices = [];
@@ -131,7 +136,7 @@ function showScreen(screenId) {
     }
 }
 
-// 음성 재생 (수정)
+// 음성 재생 (디버깅 기능 추가)
 function speak(text, wordId) {
     if (wordId) storage.incrementUseCount(wordId);
     
@@ -145,6 +150,15 @@ function speak(text, wordId) {
         utterance.voice = allVoices[selectedVoiceIndex];
     } else {
         console.warn('선택된 음성을 적용할 수 없어 기본 음성으로 재생됩니다.');
+    }
+    
+    // 디버깅 정보 업데이트
+    const debugInfo = document.getElementById('debug-info');
+    if (debugInfo) {
+        debugInfo.innerHTML = `
+            속도(Rate): ${utterance.rate.toFixed(2)}<br>
+            음성(Voice): ${utterance.voice ? utterance.voice.name : 'N/A'}
+        `;
     }
     
     utterance.onstart = () => {
@@ -214,15 +228,13 @@ function changeFontSize(size, event) {
     highlightCurrentSettings();
 }
 
-// 말하기 속도 변경 (수정)
+// 말하기 속도 변경
 function changeSpeechRate(rate, event) {
-    const rates = { 'normal': 1.0, 'slow': 0.85, 'verySlow': 0.75 };
-    
-    speechRate = rates[rate]; // 전역 변수 업데이트
+    speechRate = SPEECH_RATES[rate]; // 전역 변수 업데이트
     storage.updateSettings({ speechRate: rate });
     
     highlightCurrentSettings();
-    speak('안녕하세요'); // customRate 없이 호출
+    speak('안녕하세요');
 }
 
 // 음성 성별 변경
@@ -255,8 +267,7 @@ function highlightCurrentSettings() {
 function applySettings() {
     const settings = storage.getSettings();
     document.body.className = `font-${settings.fontSize}`;
-    const rates = { 'normal': 1.0, 'slow': 0.85, 'verySlow': 0.75 };
-    speechRate = rates[settings.speechRate] || 0.75;
+    speechRate = SPEECH_RATES[settings.speechRate] || SPEECH_RATES['verySlow'];
     voiceGender = settings.voiceGender || 'female';
     selectVoiceByGender(voiceGender);
 }
