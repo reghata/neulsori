@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-// 전역 변수
+
 let storage;
 let currentSortOrder = 'alphabet';
 let speechRate = 0.85;

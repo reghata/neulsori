@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 const CACHE_NAME = 'neulsori-v1';
 const urlsToCache = [
     './',
@@ -44,3 +44,5 @@ self.addEventListener('activate', event => {
             );
         })
     );
+})
+
