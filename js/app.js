@@ -87,7 +87,6 @@ function displayWords(containerId, words) {
     });
 }
 
-// '읽기 연습'과 '따라말하기' 분기 처리 수정
 function startPractice(word) {
     practiceWord = { ...word, isVisible: false };
     
@@ -102,7 +101,6 @@ function startPractice(word) {
     document.getElementById('mic-status').textContent = '버튼을 누르고 말씀하세요';
 
     if (currentPracticeMode === 'shadowing') {
-        // 따라말하기 연습
         practiceTitle.textContent = '따라말하기 연습';
         listenButtonContainer.style.display = 'block';
         targetWordDisplay.textContent = '탭하여 단어 보기';
@@ -110,7 +108,6 @@ function startPractice(word) {
         practiceCard.classList.add('clickable');
         cardLabel.textContent = '목표 단어 (탭하여 보기/숨기기)';
     } else { 
-        // 읽기 연습
         practiceTitle.textContent = '읽기 연습';
         listenButtonContainer.style.display = 'none';
         targetWordDisplay.textContent = practiceWord.text;
@@ -122,7 +119,6 @@ function startPractice(word) {
 }
 
 function toggleTargetWord() {
-    // 따라말하기 모드에서만 작동하도록 수정
     if (currentPracticeMode !== 'shadowing') return;
 
     practiceWord.isVisible = !practiceWord.isVisible;
@@ -199,7 +195,6 @@ function toggleEditMode(forceState = null) {
     changeSortOrder(currentSortOrder);
 }
 
-// --- 나머지 모든 함수들은 이전과 동일합니다 ---
 function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
