@@ -37,45 +37,6 @@ window.onload = function() {
     if(versionInfo) versionInfo.addEventListener('click', handleVersionClick);
 };
 
-function handleVersionClick() {
-    versionTapCount++;
-    if (versionTapCount === 1) {
-        versionTapTimer = setTimeout(() => { versionTapCount = 0; }, 3000);
-    }
-    if (versionTapCount === 5) {
-        clearTimeout(versionTapTimer);
-        versionTapCount = 0;
-        showScreen('therapist-screen');
-    }
-}
-
-function loadVoices() {
-    voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-        selectVoiceByGender(storage.getSettings().voiceGender);
-    }
-}
-
-function selectVoiceByGender(gender) {
-    const availableVoices = window.speechSynthesis.getVoices();
-    if (availableVoices.length === 0) return;
-    
-    const koreanVoices = availableVoices.filter(v => v.lang === 'ko-KR' || v.lang.startsWith('ko'));
-    if (koreanVoices.length === 0) {
-        selectedVoiceIndex = -1;
-        return;
-    }
-    
-    const genderKeywords = {
-        female: ['female', '여성', '여자', 'woman', 'yuna', 'sun-hi', 'heami'],
-        male: ['male', '남성', '남자', 'man', 'junho', 'injoon']
-    };
-    
-    const preferredVoice = koreanVoices.find(v => genderKeywords[gender].some(k => v.name.toLowerCase().includes(k)));
-    const finalVoice = preferredVoice || koreanVoices[0];
-    selectedVoiceIndex = availableVoices.indexOf(finalVoice);
-}
-
 function showScreen(screenId, practiceMode = null) {
     if (isEditMode && screenId !== 'conversation-screen') {
         toggleEditMode(false);
@@ -126,31 +87,44 @@ function displayWords(containerId, words) {
     });
 }
 
+// '읽기 연습'과 '따라말하기' 분기 처리 수정
 function startPractice(word) {
     practiceWord = { ...word, isVisible: false };
     
     const targetWordDisplay = document.getElementById('target-word-display');
-    targetWordDisplay.textContent = '탭하여 단어 보기';
-    targetWordDisplay.classList.add('hidden');
+    const practiceCard = document.getElementById('practice-word-card');
+    const cardLabel = document.getElementById('practice-card-label');
+    const listenButtonContainer = document.getElementById('listen-button-container');
+    const practiceTitle = document.getElementById('practice-title');
 
     document.getElementById('recognized-text-display').textContent = '-';
     document.getElementById('similarity-score-display').textContent = '0%';
     document.getElementById('mic-status').textContent = '버튼을 누르고 말씀하세요';
-    
-    const listenButtonContainer = document.getElementById('listen-button-container');
-    const practiceTitle = document.getElementById('practice-title');
 
     if (currentPracticeMode === 'shadowing') {
-        listenButtonContainer.style.display = 'block';
+        // 따라말하기 연습
         practiceTitle.textContent = '따라말하기 연습';
-    } else {
-        listenButtonContainer.style.display = 'none';
+        listenButtonContainer.style.display = 'block';
+        targetWordDisplay.textContent = '탭하여 단어 보기';
+        targetWordDisplay.classList.add('hidden');
+        practiceCard.classList.add('clickable');
+        cardLabel.textContent = '목표 단어 (탭하여 보기/숨기기)';
+    } else { 
+        // 읽기 연습
         practiceTitle.textContent = '읽기 연습';
+        listenButtonContainer.style.display = 'none';
+        targetWordDisplay.textContent = practiceWord.text;
+        targetWordDisplay.classList.remove('hidden');
+        practiceCard.classList.remove('clickable');
+        cardLabel.textContent = '목표 단어';
     }
     showScreen('practice-screen');
 }
 
 function toggleTargetWord() {
+    // 따라말하기 모드에서만 작동하도록 수정
+    if (currentPracticeMode !== 'shadowing') return;
+
     practiceWord.isVisible = !practiceWord.isVisible;
     const targetWordDisplay = document.getElementById('target-word-display');
     if (practiceWord.isVisible) {
@@ -162,6 +136,70 @@ function toggleTargetWord() {
     }
 }
 
+function openWordModal(isEditing = false, word = null, event) {
+    if (event) event.stopPropagation();
+    
+    const modal = document.getElementById('word-modal');
+    const title = document.getElementById('modal-title');
+    const input = document.getElementById('word-input');
+    const confirmBtn = document.getElementById('confirm-word-btn');
+
+    if (isEditing) {
+        title.textContent = '단어 편집';
+        input.value = word.text;
+        confirmBtn.textContent = '수정';
+        currentEditingWordId = word.id;
+    } else {
+        title.textContent = '새 단어 추가';
+        input.value = '';
+        confirmBtn.textContent = '추가';
+        currentEditingWordId = null;
+    }
+    modal.style.display = 'flex';
+    input.focus();
+}
+
+function closeWordModal() {
+    document.getElementById('word-modal').style.display = 'none';
+}
+
+function confirmWordAction() {
+    const input = document.getElementById('word-input');
+    const text = input.value.trim();
+    if (!text) return alert('단어를 입력해주세요!');
+
+    if (currentEditingWordId !== null) {
+        storage.updateWord(currentEditingWordId, text);
+    } else {
+        storage.addWord(text);
+    }
+    
+    closeWordModal();
+    
+    const activeScreenId = document.querySelector('.screen.active').id;
+    if (activeScreenId === 'conversation-screen') {
+        changeSortOrder(currentSortOrder);
+    } else if (activeScreenId === 'practice-list-screen') {
+        showScreen('practice-list-screen', currentPracticeMode);
+    }
+}
+
+function deleteWord(wordId, event) {
+    event.stopPropagation();
+    const word = storage.getAllWords().find(w => w.id === wordId);
+    if (confirm(`"${word.text}"를 삭제하시겠습니까?`)) {
+        storage.deleteWord(wordId);
+        changeSortOrder(currentSortOrder);
+    }
+}
+
+function toggleEditMode(forceState = null) {
+    isEditMode = forceState !== null ? forceState : !isEditMode;
+    document.getElementById('edit-mode-btn').textContent = isEditMode ? '✓' : '✏️';
+    changeSortOrder(currentSortOrder);
+}
+
+// --- 나머지 모든 함수들은 이전과 동일합니다 ---
 function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -261,63 +299,6 @@ function toggleFavorite(wordId, event) {
     changeSortOrder(currentSortOrder);
 }
 
-function openWordModal(isEditing = false, word = null, event) {
-    if (event) event.stopPropagation();
-    
-    const modal = document.getElementById('word-modal');
-    const title = document.getElementById('modal-title');
-    const input = document.getElementById('word-input');
-    const confirmBtn = document.getElementById('confirm-word-btn');
-
-    if (isEditing) {
-        title.textContent = '단어 편집';
-        input.value = word.text;
-        confirmBtn.textContent = '수정';
-        currentEditingWordId = word.id;
-    } else {
-        title.textContent = '새 단어 추가';
-        input.value = '';
-        confirmBtn.textContent = '추가';
-        currentEditingWordId = null;
-    }
-    modal.style.display = 'flex';
-    input.focus();
-}
-
-function closeWordModal() {
-    document.getElementById('word-modal').style.display = 'none';
-}
-
-function confirmWordAction() {
-    const input = document.getElementById('word-input');
-    const text = input.value.trim();
-    if (!text) return alert('단어를 입력해주세요!');
-
-    if (currentEditingWordId !== null) {
-        storage.updateWord(currentEditingWordId, text);
-    } else {
-        storage.addWord(text);
-    }
-    
-    closeWordModal();
-    
-    const activeScreenId = document.querySelector('.screen.active').id;
-    if (activeScreenId === 'conversation-screen') {
-        changeSortOrder(currentSortOrder);
-    } else if (activeScreenId === 'practice-list-screen') {
-        showScreen('practice-list-screen', currentPracticeMode);
-    }
-}
-
-function deleteWord(wordId, event) {
-    event.stopPropagation();
-    const word = storage.getAllWords().find(w => w.id === wordId);
-    if (confirm(`"${word.text}"를 삭제하시겠습니까?`)) {
-        storage.deleteWord(wordId);
-        changeSortOrder(currentSortOrder);
-    }
-}
-
 function changeSortOrder(sortBy) {
     currentSortOrder = sortBy;
     ['sort-alpha', 'sort-fav', 'sort-freq'].forEach(id => {
@@ -378,12 +359,6 @@ function applySettings() {
     speechRate = SPEECH_RATES[settings.speechRate] || SPEECH_RATES['verySlow'];
     voiceGender = settings.voiceGender || 'female';
     selectVoiceByGender(voiceGender);
-}
-
-function toggleEditMode(forceState = null) {
-    isEditMode = forceState !== null ? forceState : !isEditMode;
-    document.getElementById('edit-mode-btn').textContent = isEditMode ? '✓' : '✏️';
-    changeSortOrder(currentSortOrder);
 }
 
 function importWords(event) {
@@ -460,5 +435,17 @@ function showStats() {
     const statsDisplay = document.getElementById('stats-display');
     if (statsDisplay) {
         statsDisplay.innerHTML = statsHTML;
+    }
+}
+
+function handleVersionClick() {
+    versionTapCount++;
+    if (versionTapCount === 1) {
+        versionTapTimer = setTimeout(() => { versionTapCount = 0; }, 3000);
+    }
+    if (versionTapCount === 5) {
+        clearTimeout(versionTapTimer);
+        versionTapCount = 0;
+        showScreen('therapist-screen');
     }
 }
