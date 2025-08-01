@@ -11,21 +11,27 @@ class DataStorage {
             return JSON.parse(saved);
         }
         
-        // 초기 데이터 (기본값 수정)
+        // ======================================================
+        // ★★★ 기본 단어 목록을 수정하시려면 이 부분을 변경하세요 ★★★
+        // ======================================================
         return {
             words: [
-                { id: 1, text: '안녕하세요', isFavorite: false, useCount: 0 },
-                { id: 2, text: '감사합니다', isFavorite: false, useCount: 0 },
-                { id: 3, text: '도와주세요', isFavorite: true, useCount: 0 },
+                // 예시: 아래 목록을 환자에게 맞게 수정하세요.
+                // isFavorite: true 로 설정하면 처음부터 즐겨찾기에 추가됩니다.
+                { id: 1, text: '물', isFavorite: true, useCount: 0 },
+                { id: 2, text: '화장실', isFavorite: true, useCount: 0 },
+                { id: 3, text: '아파요', isFavorite: false, useCount: 0 },
                 { id: 4, text: '네', isFavorite: false, useCount: 0 },
-                { id: 5, text: '아니요', isFavorite: false, useCount: 0 }
+                { id: 5, text: '아니요', isFavorite: false, useCount: 0 },
+                { id: 6, text: '텔레비전', isFavorite: false, useCount: 0 },
+                { id: 7, text: '감사합니다', isFavorite: false, useCount: 0 }
             ],
             settings: {
-                fontSize: 'xlarge',      // '아주 크게'로 변경
-                speechRate: 'verySlow',  // '아주 느리게'로 변경
+                fontSize: 'xlarge',
+                speechRate: 'verySlow',
                 voiceGender: 'female'
             },
-            nextId: 6
+            nextId: 8 // ★★★ 단어 개수에 맞춰 이 숫자도 변경해주세요 (마지막 id + 1) ★★★
         };
     }
     
@@ -39,14 +45,11 @@ class DataStorage {
         return this.data.words;
     }
     
-    // 즐겨찾기 단어만 가져오기
     getFavoriteWords() {
         return this.data.words.filter(word => word.isFavorite);
     }
     
-    // 단어 추가
     addWord(text) {
-        // 중복 체크
         const exists = this.data.words.find(w => w.text === text);
         if (exists) {
             return { success: false, word: exists };
@@ -58,14 +61,21 @@ class DataStorage {
             isFavorite: false,
             useCount: 0
         };
-        
         this.data.words.push(newWord);
         this.saveData();
-        
         return { success: true, word: newWord };
     }
+
+    updateWord(id, newText) {
+        const word = this.data.words.find(w => w.id === id);
+        if (word) {
+            word.text = newText;
+            this.saveData();
+            return true;
+        }
+        return false;
+    }
     
-    // 즐겨찾기 토글
     toggleFavorite(id) {
         const word = this.data.words.find(w => w.id === id);
         if (word) {
@@ -74,7 +84,6 @@ class DataStorage {
         }
     }
     
-    // 사용 횟수 증가
     incrementUseCount(id) {
         const word = this.data.words.find(w => w.id === id);
         if (word) {
@@ -83,20 +92,16 @@ class DataStorage {
         }
     }
     
-    // 정렬된 단어 가져오기
     getSortedWords(sortBy = 'alphabet') {
         const words = [...this.data.words];
-        
         if (sortBy === 'alphabet') {
             words.sort((a, b) => a.text.localeCompare(b.text, 'ko'));
         } else if (sortBy === 'frequency') {
             words.sort((a, b) => b.useCount - a.useCount);
         }
-        
         return words;
     }
     
-    // 설정 가져오기/저장하기
     getSettings() {
         return this.data.settings;
     }
@@ -106,10 +111,8 @@ class DataStorage {
         this.saveData();
     }
 
-    // deleteWord 메서드 추가
     deleteWord(id) {
         this.data.words = this.data.words.filter(w => w.id !== id);
         this.saveData();
     }
-
 }

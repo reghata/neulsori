@@ -13,6 +13,7 @@ let versionTapTimer;
 let practiceWord = { text: '', id: null };
 let currentPracticeMode = '';
 let recognition;
+let currentEditingWordId = null;
 
 window.onload = function() {
     storage = new DataStorage();
@@ -37,6 +38,10 @@ window.onload = function() {
     if (versionInfo) {
         versionInfo.addEventListener('click', handleVersionClick);
     }
+
+    // 모달 이벤트 리스너 설정
+    document.getElementById('cancel-word-btn').onclick = closeWordModal;
+    document.getElementById('confirm-word-btn').onclick = confirmWordAction;
 };
 
 function handleVersionClick() {
@@ -79,6 +84,10 @@ function selectVoiceByGender(gender) {
 }
 
 function showScreen(screenId, practiceMode = null) {
+    if (isEditMode && screenId !== 'conversation-screen') {
+        toggleEditMode(); // 다른 화면으로 이동 시 편집 모드 자동 해제
+    }
+
     window.scrollTo(0, 0);
     document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
     const targetScreen = document.getElementById(screenId);
@@ -113,7 +122,13 @@ function displayWords(containerId, words) {
                 wordItem.onclick = () => speak(word.text, word.id);
                 wordItem.innerHTML = `<span class="word-text">${word.text}</span><button class="favorite-btn" onclick="toggleFavorite(${word.id}, event)">${word.isFavorite ? '⭐' : '☆'}</button>`;
             } else {
-                wordItem.innerHTML = `<span class="word-text">${word.text}</span><button class="delete-btn" onclick="deleteWord(${word.id})">🗑️</button>`;
+                wordItem.onclick = () => openWordModal(true, word);
+                wordItem.innerHTML = `
+                    <span class="word-text">${word.text}</span>
+                    <div class="edit-item-icons">
+                        <button onclick="openWordModal(true, {id: ${word.id}, text: '${word.text}'}, event)">✏️</button>
+                        <button class="delete-btn" onclick="deleteWord(${word.id}, event)">🗑️</button>
+                    </div>`;
             }
         } else if (containerId === 'practice-word-list-container') {
             wordItem.onclick = () => startPractice(word);
@@ -124,12 +139,15 @@ function displayWords(containerId, words) {
 }
 
 function startPractice(word) {
-    practiceWord = word;
-    document.getElementById('target-word-display').textContent = practiceWord.text;
+    practiceWord = { ...word, isVisible: false };
+    
+    const targetWordDisplay = document.getElementById('target-word-display');
+    targetWordDisplay.textContent = '탭하여 단어 보기';
+    targetWordDisplay.classList.add('hidden');
+
     document.getElementById('recognized-text-display').textContent = '-';
     document.getElementById('similarity-score-display').textContent = '0%';
     document.getElementById('mic-status').textContent = '버튼을 누르고 말씀하세요';
-    document.getElementById('mic-btn').classList.remove('recording');
     
     const listenButtonContainer = document.getElementById('listen-button-container');
     const practiceTitle = document.getElementById('practice-title');
@@ -137,12 +155,23 @@ function startPractice(word) {
     if (currentPracticeMode === 'shadowing') {
         listenButtonContainer.style.display = 'block';
         practiceTitle.textContent = '따라말하기 연습';
-        speak(practiceWord.text);
     } else { // reading
         listenButtonContainer.style.display = 'none';
         practiceTitle.textContent = '읽기 연습';
     }
     showScreen('practice-screen');
+}
+
+function toggleTargetWord() {
+    practiceWord.isVisible = !practiceWord.isVisible;
+    const targetWordDisplay = document.getElementById('target-word-display');
+    if (practiceWord.isVisible) {
+        targetWordDisplay.textContent = practiceWord.text;
+        targetWordDisplay.classList.remove('hidden');
+    } else {
+        targetWordDisplay.textContent = '탭하여 단어 보기';
+        targetWordDisplay.classList.add('hidden');
+    }
 }
 
 function setupSpeechRecognition() {
@@ -161,26 +190,28 @@ function setupSpeechRecognition() {
         document.getElementById('mic-btn').classList.add('recording');
         document.getElementById('mic-status').textContent = '듣고 있어요...';
     };
-
-    recognition.onspeechend = () => {
-        recognition.stop();
-        document.getElementById('mic-btn').classList.remove('recording');
-        document.getElementById('mic-status').textContent = '분석 중...';
-    };
-
+    
     recognition.onresult = (event) => {
         const spokenText = event.results[0][0].transcript;
         document.getElementById('recognized-text-display').textContent = spokenText;
-        
         const similarity = calculateSimilarity(practiceWord.text, spokenText);
         document.getElementById('similarity-score-display').textContent = `${similarity.toFixed(0)}%`;
-        document.getElementById('mic-status').textContent = '버튼을 누르고 다시 시도하세요';
     };
 
     recognition.onerror = (event) => {
         console.error('음성 인식 오류:', event.error);
+        let errorMessage = '오류가 발생했습니다. 다시 시도하세요.';
+        if (event.error === 'no-speech') errorMessage = '음성이 감지되지 않았습니다.';
+        else if (event.error === 'not-allowed') errorMessage = '마이크 사용 권한을 허용해주세요.';
+        document.getElementById('mic-status').textContent = errorMessage;
+    };
+    
+    recognition.onend = () => {
         document.getElementById('mic-btn').classList.remove('recording');
-        document.getElementById('mic-status').textContent = '오류가 발생했습니다. 다시 시도하세요.';
+        const micStatus = document.getElementById('mic-status');
+        if (micStatus.textContent === '듣고 있어요...') {
+            micStatus.textContent = '버튼을 누르고 다시 시도하세요';
+        }
     };
 }
 
@@ -189,11 +220,8 @@ function startRecognition() {
         try {
             recognition.start();
         } catch(e) {
-            console.error("음성 인식 시작 오류:", e);
             document.getElementById('mic-status').textContent = '음성 인식을 시작할 수 없습니다.';
         }
-    } else {
-        alert("음성 인식 기능이 초기화되지 않았습니다.");
     }
 }
 
@@ -215,11 +243,7 @@ function levenshteinDistance(a, b) {
     for (let j = 1; j <= b.length; j += 1) {
         for (let i = 1; i <= a.length; i += 1) {
             const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
-            matrix[j][i] = Math.min(
-                matrix[j][i - 1] + 1,
-                matrix[j - 1][i] + 1,
-                matrix[j - 1][i - 1] + indicator,
-            );
+            matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + indicator);
         }
     }
     return matrix[b.length][a.length];
@@ -253,38 +277,61 @@ function toggleFavorite(wordId, event) {
     changeSortOrder(currentSortOrder);
 }
 
-function addWord() {
-    const modal = document.getElementById('add-word-modal');
-    modal.style.display = 'block';
-    const input = document.getElementById('new-word-input');
+function openWordModal(isEditing = false, word = null, event) {
+    if (event) event.stopPropagation();
+    
+    const modal = document.getElementById('word-modal');
+    const title = document.getElementById('modal-title');
+    const input = document.getElementById('word-input');
+    const confirmBtn = document.getElementById('confirm-word-btn');
+
+    if (isEditing) {
+        title.textContent = '단어 편집';
+        input.value = word.text;
+        confirmBtn.textContent = '수정';
+        currentEditingWordId = word.id;
+    } else {
+        title.textContent = '새 단어 추가';
+        input.value = '';
+        confirmBtn.textContent = '추가';
+        currentEditingWordId = null;
+    }
+    modal.style.display = 'flex';
     input.focus();
-    input.onkeypress = e => { if (e.key === 'Enter') confirmAddWord(); };
 }
 
-function confirmAddWord() {
-    const input = document.getElementById('new-word-input');
+function closeWordModal() {
+    document.getElementById('word-modal').style.display = 'none';
+}
+
+function confirmWordAction() {
+    const input = document.getElementById('word-input');
     const text = input.value.trim();
     if (!text) return alert('단어를 입력해주세요!');
+
+    if (currentEditingWordId !== null) {
+        storage.updateWord(currentEditingWordId, text);
+    } else {
+        storage.addWord(text);
+    }
     
-    const result = storage.addWord(text);
-    closeAddWordModal();
+    closeWordModal();
     
-    // 현재 활성화된 화면에 따라 목록을 새로고침
     const activeScreenId = document.querySelector('.screen.active').id;
     if (activeScreenId === 'conversation-screen') {
         changeSortOrder(currentSortOrder);
     } else if (activeScreenId === 'practice-list-screen') {
-        // 'practice-list-screen'을 다시 로드하여 목록을 갱신
         showScreen('practice-list-screen', currentPracticeMode);
     }
-
-    setTimeout(() => speak(result.word.text, result.word.id), 100);
 }
 
-function closeAddWordModal() {
-    const modal = document.getElementById('add-word-modal');
-    modal.style.display = 'none';
-    document.getElementById('new-word-input').value = '';
+function deleteWord(wordId, event) {
+    event.stopPropagation();
+    const word = storage.getAllWords().find(w => w.id === wordId);
+    if (confirm(`"${word.text}"를 삭제하시겠습니까?`)) {
+        storage.deleteWord(wordId);
+        changeSortOrder(currentSortOrder);
+    }
 }
 
 function changeSortOrder(sortBy) {
@@ -352,16 +399,7 @@ function applySettings() {
 function toggleEditMode() {
     isEditMode = !isEditMode;
     document.getElementById('edit-mode-btn').textContent = isEditMode ? '✓' : '✏️';
-    document.getElementById('word-list-container').classList.toggle('edit-mode', isEditMode);
     changeSortOrder(currentSortOrder);
-}
-
-function deleteWord(wordId) {
-    const word = storage.getAllWords().find(w => w.id === wordId);
-    if (confirm(`"${word.text}"를 삭제하시겠습니까?`)) {
-        storage.deleteWord(wordId);
-        changeSortOrder(currentSortOrder);
-    }
 }
 
 function importWords(event) {
@@ -418,8 +456,6 @@ function bulkAddWords() {
     
     setTimeout(() => { button.textContent = originalText; }, 2000);
 }
-
-function generateShareCode() { /* ... */ }
 
 function showStats() {
     const words = storage.getAllWords();
