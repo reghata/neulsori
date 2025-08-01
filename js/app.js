@@ -10,7 +10,7 @@ let selectedVoiceIndex = -1;
 let voiceGender = 'female';
 let versionTapCount = 0;
 let versionTapTimer;
-let practiceWord = { text: '', id: null };
+let practiceWord = { text: '', id: null, isVisible: false };
 let currentPracticeMode = '';
 let recognition;
 let currentEditingWordId = null;
@@ -20,10 +20,7 @@ window.onload = function() {
     applySettings();
     setupSpeechRecognition();
     
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./service-worker.js');
-    }
-    
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
     }
@@ -34,14 +31,10 @@ window.onload = function() {
         showScreen('home-screen');
     }, 2000);
     
-    const versionInfo = document.getElementById('version-info');
-    if (versionInfo) {
-        versionInfo.addEventListener('click', handleVersionClick);
-    }
-
-    // 모달 이벤트 리스너 설정
     document.getElementById('cancel-word-btn').onclick = closeWordModal;
     document.getElementById('confirm-word-btn').onclick = confirmWordAction;
+    const versionInfo = document.getElementById('version-info');
+    if(versionInfo) versionInfo.addEventListener('click', handleVersionClick);
 };
 
 function handleVersionClick() {
@@ -85,22 +78,18 @@ function selectVoiceByGender(gender) {
 
 function showScreen(screenId, practiceMode = null) {
     if (isEditMode && screenId !== 'conversation-screen') {
-        toggleEditMode(); // 다른 화면으로 이동 시 편집 모드 자동 해제
+        toggleEditMode(false);
     }
-
     window.scrollTo(0, 0);
     document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-    const targetScreen = document.getElementById(screenId);
-    if (targetScreen) {
-        targetScreen.classList.add('active');
-    }
+    document.getElementById(screenId)?.classList.add('active');
 
     if (screenId === 'conversation-screen') {
         changeSortOrder(currentSortOrder);
     } else if (screenId === 'practice-list-screen') {
-        currentPracticeMode = practiceMode;
+        if (practiceMode !== null) currentPracticeMode = practiceMode;
         document.getElementById('practice-list-title').textContent = 
-            practiceMode === 'reading' ? '읽기 연습' : '따라말하기 연습';
+            currentPracticeMode === 'reading' ? '읽기 연습' : '따라말하기 연습';
         displayWords('practice-word-list-container', storage.getSortedWords('alphabet'));
     } else if (screenId === 'settings-screen') {
         highlightCurrentSettings();
@@ -122,7 +111,6 @@ function displayWords(containerId, words) {
                 wordItem.onclick = () => speak(word.text, word.id);
                 wordItem.innerHTML = `<span class="word-text">${word.text}</span><button class="favorite-btn" onclick="toggleFavorite(${word.id}, event)">${word.isFavorite ? '⭐' : '☆'}</button>`;
             } else {
-                wordItem.onclick = () => openWordModal(true, word);
                 wordItem.innerHTML = `
                     <span class="word-text">${word.text}</span>
                     <div class="edit-item-icons">
@@ -155,7 +143,7 @@ function startPractice(word) {
     if (currentPracticeMode === 'shadowing') {
         listenButtonContainer.style.display = 'block';
         practiceTitle.textContent = '따라말하기 연습';
-    } else { // reading
+    } else {
         listenButtonContainer.style.display = 'none';
         practiceTitle.textContent = '읽기 연습';
     }
@@ -176,10 +164,7 @@ function toggleTargetWord() {
 
 function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        console.error("이 브라우저는 음성 인식을 지원하지 않습니다.");
-        return;
-    }
+    if (!SpeechRecognition) return;
     
     recognition = new SpeechRecognition();
     recognition.lang = 'ko-KR';
@@ -199,8 +184,7 @@ function setupSpeechRecognition() {
     };
 
     recognition.onerror = (event) => {
-        console.error('음성 인식 오류:', event.error);
-        let errorMessage = '오류가 발생했습니다. 다시 시도하세요.';
+        let errorMessage = '오류가 발생했습니다.';
         if (event.error === 'no-speech') errorMessage = '음성이 감지되지 않았습니다.';
         else if (event.error === 'not-allowed') errorMessage = '마이크 사용 권한을 허용해주세요.';
         document.getElementById('mic-status').textContent = errorMessage;
@@ -396,8 +380,8 @@ function applySettings() {
     selectVoiceByGender(voiceGender);
 }
 
-function toggleEditMode() {
-    isEditMode = !isEditMode;
+function toggleEditMode(forceState = null) {
+    isEditMode = forceState !== null ? forceState : !isEditMode;
     document.getElementById('edit-mode-btn').textContent = isEditMode ? '✓' : '✏️';
     changeSortOrder(currentSortOrder);
 }

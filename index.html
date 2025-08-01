@@ -20,18 +20,20 @@
 
     <!-- 홈 화면 -->
     <div id="home-screen" class="screen">
-        <header>
-            <div>
-                <h1 class="logo">
-                    <img src="assets/logo.png" alt="늘">
-                    <span>소리</span>
-                </h1>
-            </div>
-            <div></div>
-            <div>
-                <button class="icon-btn" onclick="showScreen('settings-screen')">⚙️</button>
-            </div>
-        </header>
+        <div class="sticky-header">
+            <header>
+                <div>
+                    <h1 class="logo">
+                        <img src="assets/logo.png" alt="늘">
+                        <span>소리</span>
+                    </h1>
+                </div>
+                <div></div>
+                <div>
+                    <button class="icon-btn" onclick="showScreen('settings-screen')">⚙️</button>
+                </div>
+            </header>
+        </div>
         <div class="main-menu">
             <button class="menu-btn" onclick="showScreen('conversation-screen')">
                 <span class="icon">🗣️</span>
@@ -50,21 +52,23 @@
 
     <!-- 대화 화면 -->
     <div id="conversation-screen" class="screen">
-        <header>
-            <div>
-                <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
+        <div class="sticky-header">
+            <header>
+                <div>
+                    <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
+                </div>
+                <div>
+                    <h2>대화</h2>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" id="edit-mode-btn" onclick="toggleEditMode()">✏️</button>
+                </div>
+            </header>
+            <div class="sort-toggle">
+                <button id="sort-alpha" class="active" onclick="changeSortOrder('alphabet')">ㄱㄴㄷ순</button>
+                <button id="sort-fav" onclick="changeSortOrder('favorites')">즐겨찾기</button>
+                <button id="sort-freq" onclick="changeSortOrder('frequency')">자주 사용순</button>
             </div>
-            <div>
-                <h2>대화</h2>
-            </div>
-            <div class="header-icons">
-                <button class="icon-btn" id="edit-mode-btn" onclick="toggleEditMode()">✏️</button>
-            </div>
-        </header>
-        <div class="sort-toggle">
-            <button id="sort-alpha" class="active" onclick="changeSortOrder('alphabet')">ㄱㄴㄷ순</button>
-            <button id="sort-fav" onclick="changeSortOrder('favorites')">즐겨찾기</button>
-            <button id="sort-freq" onclick="changeSortOrder('frequency')">자주 사용순</button>
         </div>
         <div class="word-container" id="word-list-container"></div>
         <button class="fab" onclick="openWordModal()">+</button>
@@ -72,15 +76,17 @@
 
     <!-- 연습 단어 선택 화면 -->
     <div id="practice-list-screen" class="screen">
-        <header>
-            <div>
-                <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
-            </div>
-            <div>
-                <h2 id="practice-list-title">연습 단어 선택</h2>
-            </div>
-            <div></div>
-        </header>
+        <div class="sticky-header">
+            <header>
+                <div>
+                    <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
+                </div>
+                <div>
+                    <h2 id="practice-list-title">연습 단어 선택</h2>
+                </div>
+                <div></div>
+            </header>
+        </div>
         <div class="word-container" id="practice-word-list-container"></div>
         <button class="fab" onclick="openWordModal()">+</button>
     </div>
@@ -88,13 +94,8 @@
     <!-- 연습 화면 -->
     <div id="practice-screen" class="screen">
         <header>
-            <div>
-                <!-- 수정된 부분: currentPracticeMode를 인자로 전달 -->
-                <button class="icon-btn" onclick="showScreen('practice-list-screen', currentPracticeMode)">←</button>
-            </div>
-            <div>
-                <h2 id="practice-title">연습</h2>
-            </div>
+            <button class="icon-btn" onclick="showScreen('practice-list-screen', currentPracticeMode)">←</button>
+            <h2 id="practice-title">연습</h2>
             <div></div>
         </header>
         <div class="practice-container">
@@ -125,13 +126,11 @@
     <!-- 설정 화면 -->
     <div id="settings-screen" class="screen">
         <header>
-            <div>
-                <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
-            </div>
-            <div><h2>설정</h2></div>
+            <button class="icon-btn" onclick="showScreen('home-screen')">←</button>
+            <h2>설정</h2>
             <div></div>
         </header>
-        <div style="max-width: 600px; margin: 0 auto;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>글자 크기</h3>
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
@@ -179,11 +178,11 @@
     <!-- 치료사 모드 화면 -->
     <div id="therapist-screen" class="screen">
         <header>
-            <div><button class="icon-btn" onclick="showScreen('settings-screen')">←</button></div>
-            <div><h2>치료사 모드</h2></div>
+            <button class="icon-btn" onclick="showScreen('settings-screen')">←</button>
+            <h2>치료사 모드</h2>
             <div></div>
         </header>
-        <div style="max-width: 600px; margin: 0 auto;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>빠른 단어 추가</h3>
                 <textarea id="bulk-words" placeholder="여러 단어를 한 줄씩 입력하세요" style="width: 100%; height: 150px; padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 5px;"></textarea>
