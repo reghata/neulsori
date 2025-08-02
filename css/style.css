@@ -50,413 +50,10 @@ body.font-large header h2 {
     font-size: 1.2em;
 }
 
-/* ===== 메인 메뉴 (홈 화면) ===== */
-.main-menu { display: flex; flex-direction: column; gap: 20px; max-width: 400px; margin: 50px auto; padding: 0 20px; }
-.menu-btn { display: flex; align-items: center; gap: 20px; padding: 10px; background-color: white; border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s; font-size: 1em; min-height: 20px; box-sizing: border-box; }
-.menu-btn:active { transform: scale(0.98); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.menu-btn .icon { font-size: 2em; }
-
-/* ===== 단어 목록 ===== */
-.word-item { display: flex; justify-content: space-between; align-items: center; padding: 0em 0.8em; margin: 10px 0; background-color: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease; font-size: 1.3em; border: 2px solid transparent; user-select: none; min-height: 60px; box-sizing: border-box; }
-.word-item:active { background-color: #e8f5e9; transform: scale(0.98); }
-.word-item.playing { background-color: #81c784; border: 2px solid #4CAF50; transform: scale(1.02); }
-.word-text { flex: 1; padding-right: 10px; cursor: pointer; }
-.favorite-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; transition: transform 0.2s; }
-
-/* ===== 연습 화면 스타일 ===== */
-.practice-container { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 20px; padding: 0 20px; }
-.practice-word-card, .practice-result-card { background: white; border-radius: 15px; padding: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.practice-word-card { cursor: pointer; }
-.practice-word-card p, .practice-result-card p { color: #666; font-size: 0.9em; margin-bottom: 5px; }
-.practice-word-card h3, .practice-result-card h3 { font-size: 2em; color: #333; }
-.practice-word-card h3.hidden { color: #ccc; } /* 숨김 상태 스타일 */
-.practice-result-card h3 { min-height: 1.2em; }
-.similarity-score { margin-top: 15px; font-size: 1.2em !important; color: #4CAF50 !important; font-weight: bold; }
-.mic-button-container { text-align: center; }
-.mic-btn { width: 100px; height: 100px; border-radius: 50%; border: none; background-color: #2196F3; color: white; font-size: 3em; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin: 0 auto; }
-.mic-btn.recording { background-color: #f44336; animation: pulse 1.5s infinite; }
-#mic-status { margin-top: 10px; color: #666; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(244, 67, 54, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); } }
-.practice-btn { background: #607d8b; color: white; padding: 15px; border-radius: 10px; font-size: 1em; display: flex; align-items: center; justify-content: center; gap: 10px; }
-
-/* ===== FAB, 정렬, 편집, 설정 등 나머지 스타일 ===== */
-.fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: #2196F3; color: white; border: none; border-radius: 50%; font-size: 1.5em; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s; }
-.sort-toggle { display: flex; justify-content: center; padding: 20px 0; gap: 10px; background-color: #f5f5f5; }
-.sort-toggle button { padding: 10px 20px; border: 2px solid #4CAF50; background: white; color: #4CAF50; border-radius: 25px; font-size: 0.9em; cursor: pointer; }
-.sort-toggle button.active { background: #4CAF50; color: white; }
-.word-container.edit-mode .word-item { background-color: #fff3cd; }
-.edit-item-icons { display: flex; gap: 15px; } /* 편집 모드 아이콘 */
-.edit-item-icons button { font-size: 1.3em; padding: 5px; color: #666; background: none; }
-.delete-btn { color: #f44336 !important; }
-
-/* ===== 모달 스타일 ===== */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: white; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; }
-.modal-content h3 { margin-bottom: 20px; }
-.modal-content input { width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; }
-.modal-buttons { display: flex; gap: 10px; }
-.modal-buttons button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 1em; }
-.modal-buttons button.primary { background: #4CAF50; color: white; }
-
-/* ===== 설정 화면 ===== */
-/* header 안의 버튼은 제외하고, 설정 항목 버튼에만 스타일 적용하도록 수정 */
-#settings-screen > div > div button {
-    width: 100%;
-    padding: 15px;
-    margin: 5px 0;
-    border: none;
-    background: #2196F3; /* 기본 파란색 */
-    color: white;
-    border-radius: 10px;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-#settings-screen button:active {
-    transform: scale(0.98);
-}
-
-/* 활성화된 설정 버튼 (초록색) */
-#settings-screen button.active {
-    background: #4CAF50;
-}
-
-#settings-screen button:hover {
-    background: #1976D2; /* 호버 시 어두운 파란색 */
-}
-
-#settings-screen button.active:hover {
-    background: #45A049; /* 활성화된 버튼 호버 시 */
-}
-
-/* ===== 도움말 화면 ===== */
-.help-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.help-section {
-    background: white;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.help-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.help-section h3 {
-    color: #4CAF50;
-    margin: 0;
-    font-size: 1.2em;
-    border-bottom: 2px solid #4CAF50;
-    padding-bottom: 5px;
-    flex: 1;
-}
-
-.help-audio-btn {
-    background: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-left: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.help-audio-btn:hover {
-    background: #1976D2;
-}
-
-.help-audio-btn:active {
-    transform: scale(0.95);
-}
-
-.help-audio-btn.playing {
-    background: #4CAF50;
-    animation: pulse-help 1.5s infinite;
-}
-
-@keyframes pulse-help {
-    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-}
-
-.help-section h4 {
-    color: #333;
-    margin: 15px 0 10px 0;
-    font-size: 1em;
-}
-
-.help-section p {
-    line-height: 1.6;
-    margin-bottom: 10px;
-    color: #555;
-}
-
-.help-section ul,
-.help-section ol {
-    margin: 10px 0;
-    padding-left: 20px;
-}
-
-.help-section li {
-    line-height: 1.6;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.help-section strong {
-    color: #333;
-}
-
-
-/* ===== 기본 설정 ===== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; color: #333; line-height: 1.6; font-size: 18px; }
-body.font-normal { font-size: 18px; }
-body.font-large { font-size: 24px; }
-body.font-xlarge { font-size: 30px; }
-
-/* ===== 화면 전환 ===== */
-.screen { display: none; min-height: 100vh; animation: fadeIn 0.3s ease-in; }
-.screen.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* ===== 고정 헤더 (수정) ===== */
-.sticky-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background-color: #f5f5f5;
-}
-/* 스크롤되는 컨텐츠가 고정 헤더 아래부터 시작되도록 */
-.word-container { padding: 20px; max-width: 600px; margin: 0 auto; }
-#conversation-screen, #practice-list-screen { padding: 0; }
-
-/* ===== 헤더 ===== */
-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-header > * { flex: 1; display: flex; align-items: center; }
-header > *:first-child { justify-content: flex-start; }
-header > *:nth-child(2) { justify-content: center; }
-header > *:last-child { justify-content: flex-end; }
-h1.logo { display: flex; align-items: center; gap: 4px; font-size: 1.5em; font-weight: bold; margin: 0; white-space: nowrap; min-width: 0; }
-h1.logo img { height: 1.2em; }
-header h2 { margin: 0; font-size: 1.3em; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.header-icons { display: flex; gap: 8px; }
-.icon-btn { background: none; border: none; font-size: 1.2em; cursor: pointer; padding: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; line-height: 1; }
-
-/* ===== 큰 폰트에서 헤더 크기 조정 ===== */
-body.font-xlarge h1.logo {
-    font-size: 1.2em;
-}
-
-body.font-xlarge header h2 {
-    font-size: 1.1em;
-}
-
-body.font-large h1.logo {
-    font-size: 1.3em;
-}
-
-body.font-large header h2 {
-    font-size: 1.2em;
-}
-
-/* ===== 메인 메뉴 (홈 화면) ===== */
-.main-menu { display: flex; flex-direction: column; gap: 20px; max-width: 400px; margin: 50px auto; padding: 0 20px; }
-.menu-btn { display: flex; align-items: center; gap: 20px; padding: 10px; background-color: white; border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s; font-size: 1em; min-height: 20px; box-sizing: border-box; }
-.menu-btn:active { transform: scale(0.98); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.menu-btn .icon { font-size: 2em; }
-
-/* ===== 단어 목록 ===== */
-.word-item { display: flex; justify-content: space-between; align-items: center; padding: 0em 0.8em; margin: 10px 0; background-color: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease; font-size: 1.3em; border: 2px solid transparent; user-select: none; min-height: 60px; box-sizing: border-box; }
-.word-item:active { background-color: #e8f5e9; transform: scale(0.98); }
-.word-item.playing { background-color: #81c784; border: 2px solid #4CAF50; transform: scale(1.02); }
-.word-text { flex: 1; padding-right: 10px; cursor: pointer; }
-.favorite-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; transition: transform 0.2s; }
-
-/* ===== 연습 화면 스타일 ===== */
-.practice-container { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 20px; padding: 0 20px; }
-.practice-word-card, .practice-result-card { background: white; border-radius: 15px; padding: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.practice-word-card { cursor: pointer; }
-.practice-word-card p, .practice-result-card p { color: #666; font-size: 0.9em; margin-bottom: 5px; }
-.practice-word-card h3, .practice-result-card h3 { font-size: 2em; color: #333; }
-.practice-word-card h3.hidden { color: #ccc; } /* 숨김 상태 스타일 */
-.practice-result-card h3 { min-height: 1.2em; }
-.similarity-score { margin-top: 15px; font-size: 1.2em !important; color: #4CAF50 !important; font-weight: bold; }
-.mic-button-container { text-align: center; }
-.mic-btn { width: 100px; height: 100px; border-radius: 50%; border: none; background-color: #2196F3; color: white; font-size: 3em; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin: 0 auto; }
-.mic-btn.recording { background-color: #f44336; animation: pulse 1.5s infinite; }
-#mic-status { margin-top: 10px; color: #666; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(244, 67, 54, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); } }
-.practice-btn { background: #607d8b; color: white; padding: 15px; border-radius: 10px; font-size: 1em; display: flex; align-items: center; justify-content: center; gap: 10px; }
-
-/* ===== FAB, 정렬, 편집, 설정 등 나머지 스타일 ===== */
-.fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: #2196F3; color: white; border: none; border-radius: 50%; font-size: 1.5em; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s; }
-.sort-toggle { display: flex; justify-content: center; padding: 20px 0; gap: 10px; background-color: #f5f5f5; }
-.sort-toggle button { padding: 10px 20px; border: 2px solid #4CAF50; background: white; color: #4CAF50; border-radius: 25px; font-size: 0.9em; cursor: pointer; }
-.sort-toggle button.active { background: #4CAF50; color: white; }
-.word-container.edit-mode .word-item { background-color: #fff3cd; }
-.edit-item-icons { display: flex; gap: 15px; } /* 편집 모드 아이콘 */
-.edit-item-icons button { font-size: 1.3em; padding: 5px; color: #666; background: none; }
-.delete-btn { color: #f44336 !important; }
-
-/* ===== 모달 스타일 ===== */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: white; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; }
-.modal-content h3 { margin-bottom: 20px; }
-.modal-content input { width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; }
-.modal-buttons { display: flex; gap: 10px; }
-.modal-buttons button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 1em; }
-.modal-buttons button.primary { background: #4CAF50; color: white; }
-
-/* ===== 설정 화면 ===== */
-/* header 안의 버튼은 제외하고, 설정 항목 버튼에만 스타일 적용하도록 수정 */
-#settings-screen > div > div button {
-    width: 100%;
-    padding: 15px;
-    margin: 5px 0;
-    border: none;
-    background: #2196F3; /* 기본 파란색 */
-    color: white;
-    border-radius: 10px;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-#settings-screen button:active {
-    transform: scale(0.98);
-}
-
-/* 활성화된 설정 버튼 (초록색) */
-#settings-screen button.active {
-    background: #4CAF50;
-}
-
-#settings-screen button:hover {
-    background: #1976D2; /* 호버 시 어두운 파란색 */
-}
-
-#settings-screen button.active:hover {
-    background: #45A049; /* 활성화된 버튼 호버 시 */
-}
-
-/* ===== 도움말 화면 ===== */
-.help-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.help-section {
-    background: white;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.help-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.help-section h3 {
-    color: #4CAF50;
-    margin: 0;
-    font-size: 1.2em;
-    border-bottom: 2px solid #4CAF50;
-    padding-bottom: 5px;
-    flex: 1;
-}
-
-.help-audio-btn {
-    background: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-left: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.help-audio-btn:hover {
-    background: #1976D2;
-}
-
-.help-audio-btn:active {
-    transform: scale(0.95);
-}
-
-.help-audio-btn.playing {
-    background: #4CAF50;
-    animation: pulse-help 1.5s infinite;
-}
-
-@keyframes pulse-help {
-    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-}
-
-.help-section h4 {
-    color: #333;
-    margin: 15px 0 10px 0;
-    font-size: 1em;
-}
-
-.help-section p {
-    line-height: 1.6;
-    margin-bottom: 10px;
-    color: #555;
-}
-
-.help-section ul,
-.help-section ol {
-    margin: 10px 0;
-    padding-left: 20px;
-}
-
-.help-section li {
-    line-height: 1.6;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.help-section strong {
-    color: #333;
-}
-
-
-    /* ===== 헤더 레이아웃 개선 (전체 화면) ===== */
+/* ===== 헤더 레이아웃 개선 (전체 화면) ===== */
 /* 뒤로가기 버튼: 최소 필요 공간만 */
 #conversation-screen header > *:first-child,
 #practice-list-screen header > *:first-child,
-#practice-screen header > *:first-child,
 #help-screen header > *:first-child,
 #settings-screen header > *:first-child { 
     flex: 0 0 50px; 
@@ -465,7 +62,6 @@ body.font-large header h2 {
 /* 제목: 남은 공간 대부분 차지 */
 #conversation-screen header > *:nth-child(2),
 #practice-list-screen header > *:nth-child(2),
-#practice-screen header > *:nth-child(2),
 #help-screen header > *:nth-child(2),
 #settings-screen header > *:nth-child(2) { 
     flex: 1; 
@@ -474,7 +70,6 @@ body.font-large header h2 {
 /* 우측 버튼들: 충분한 터치 영역 확보 */
 #conversation-screen header > *:last-child,
 #practice-list-screen header > *:last-child,
-#practice-screen header > *:last-child,
 #help-screen header > *:last-child,
 #settings-screen header > *:last-child { 
     flex: 0 0 80px; 
@@ -484,5 +79,224 @@ body.font-large header h2 {
 #home-screen header > * { 
     flex: 1; 
 }
+
+/* ===== 연습 화면 헤더 레이아웃 수정 (sticky-header 없는 특별 케이스) ===== */
+#practice-screen header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 연습 화면 뒤로가기 버튼: 최소 공간 */
+#practice-screen header > *:first-child { 
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* 연습 화면 제목: 최대한 넓게 */
+#practice-screen header > *:nth-child(2) { 
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+/* 연습 화면 우측 설정 버튼: 최소 공간 */
+#practice-screen header > *:last-child { 
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* 연습 화면 제목 텍스트 최적화 */
+#practice-screen header h2 {
+    margin: 0;
+    font-size: 1.3em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* ===== 메인 메뉴 (홈 화면) ===== */
+.main-menu { display: flex; flex-direction: column; gap: 20px; max-width: 400px; margin: 50px auto; padding: 0 20px; }
+.menu-btn { display: flex; align-items: center; gap: 20px; padding: 10px; background-color: white; border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s; font-size: 1em; min-height: 20px; box-sizing: border-box; }
+.menu-btn:active { transform: scale(0.98); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.menu-btn .icon { font-size: 2em; }
+
+/* ===== 단어 목록 ===== */
+.word-item { display: flex; justify-content: space-between; align-items: center; padding: 0em 0.8em; margin: 10px 0; background-color: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease; font-size: 1.3em; border: 2px solid transparent; user-select: none; min-height: 60px; box-sizing: border-box; }
+.word-item:active { background-color: #e8f5e9; transform: scale(0.98); }
+.word-item.playing { background-color: #81c784; border: 2px solid #4CAF50; transform: scale(1.02); }
+.word-text { flex: 1; padding-right: 10px; cursor: pointer; }
+.favorite-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; transition: transform 0.2s; }
+
+/* ===== 연습 화면 스타일 ===== */
+.practice-container { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 20px; padding: 0 20px; }
+.practice-word-card, .practice-result-card { background: white; border-radius: 15px; padding: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.practice-word-card { cursor: pointer; }
+.practice-word-card p, .practice-result-card p { color: #666; font-size: 0.9em; margin-bottom: 5px; }
+.practice-word-card h3, .practice-result-card h3 { font-size: 2em; color: #333; }
+.practice-word-card h3.hidden { color: #ccc; } /* 숨김 상태 스타일 */
+.practice-result-card h3 { min-height: 1.2em; }
+.similarity-score { margin-top: 15px; font-size: 1.2em !important; color: #4CAF50 !important; font-weight: bold; }
+.mic-button-container { text-align: center; }
+.mic-btn { width: 100px; height: 100px; border-radius: 50%; border: none; background-color: #2196F3; color: white; font-size: 3em; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin: 0 auto; }
+.mic-btn.recording { background-color: #f44336; animation: pulse 1.5s infinite; }
+#mic-status { margin-top: 10px; color: #666; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(244, 67, 54, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); } }
+.practice-btn { background: #607d8b; color: white; padding: 15px; border-radius: 10px; font-size: 1em; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+/* ===== FAB, 정렬, 편집, 설정 등 나머지 스타일 ===== */
+.fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: #2196F3; color: white; border: none; border-radius: 50%; font-size: 1.5em; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s; }
+.sort-toggle { display: flex; justify-content: center; padding: 20px 0; gap: 10px; background-color: #f5f5f5; }
+.sort-toggle button { padding: 10px 20px; border: 2px solid #4CAF50; background: white; color: #4CAF50; border-radius: 25px; font-size: 0.9em; cursor: pointer; }
+.sort-toggle button.active { background: #4CAF50; color: white; }
+.word-container.edit-mode .word-item { background-color: #fff3cd; }
+.edit-item-icons { display: flex; gap: 15px; } /* 편집 모드 아이콘 */
+.edit-item-icons button { font-size: 1.3em; padding: 5px; color: #666; background: none; }
+.delete-btn { color: #f44336 !important; }
+
+/* ===== 모달 스타일 ===== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-content { background: white; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; }
+.modal-content h3 { margin-bottom: 20px; }
+.modal-content input { width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; }
+.modal-buttons { display: flex; gap: 10px; }
+.modal-buttons button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 1em; }
+.modal-buttons button.primary { background: #4CAF50; color: white; }
+
+/* ===== 설정 화면 ===== */
+/* header 안의 버튼은 제외하고, 설정 항목 버튼에만 스타일 적용하도록 수정 */
+#settings-screen > div > div button {
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0;
+    border: none;
+    background: #2196F3; /* 기본 파란색 */
+    color: white;
+    border-radius: 10px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#settings-screen button:active {
+    transform: scale(0.98);
+}
+
+/* 활성화된 설정 버튼 (초록색) */
+#settings-screen button.active {
+    background: #4CAF50;
+}
+
+#settings-screen button:hover {
+    background: #1976D2; /* 호버 시 어두운 파란색 */
+}
+
+#settings-screen button.active:hover {
+    background: #45A049; /* 활성화된 버튼 호버 시 */
+}
+
+/* ===== 도움말 화면 ===== */
+.help-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.help-section {
+    background: white;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.help-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.help-section h3 {
+    color: #4CAF50;
+    margin: 0;
+    font-size: 1.2em;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+    flex: 1;
+}
+
+.help-audio-btn {
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.help-audio-btn:hover {
+    background: #1976D2;
+}
+
+.help-audio-btn:active {
+    transform: scale(0.95);
+}
+
+.help-audio-btn.playing {
+    background: #4CAF50;
+    animation: pulse-help 1.5s infinite;
+}
+
+@keyframes pulse-help {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+.help-section h4 {
+    color: #333;
+    margin: 15px 0 10px 0;
+    font-size: 1em;
+}
+
+.help-section p {
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.help-section ul,
+.help-section ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.help-section li {
+    line-height: 1.6;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.help-section strong {
+    color: #333;
     font-weight: bold;
 }
