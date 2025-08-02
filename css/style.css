@@ -301,36 +301,72 @@ body.font-large header h2 {
     font-weight: bold;
 }
 
-
 /* ===== 연습 화면 헤더 레이아웃 수정 ===== */
-#practice-screen header > button:first-child { 
-    flex: 0 0 44px;
+#practice-screen header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-#practice-screen header > h2 { 
+/* 뒤로가기 버튼: 최소 공간 (44px) */
+#practice-screen header > *:first-child { 
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* 제목: 남은 공간 최대한 활용하면서 좌우 여백 확보 */
+#practice-screen header > *:nth-child(2) { 
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0; /* flex item이 줄어들 수 있도록 */
+    padding: 0 15px; /* 좌우 여백을 늘려서 텍스트 공간 확보 */
+}
+
+/* 우측 설정 버튼: 최소 공간 (44px) */
+#practice-screen header > *:last-child { 
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* 제목 텍스트 최적화 */
+#practice-screen header h2 {
     margin: 0;
     font-size: 1.3em;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 10px;
+    width: 100%;
+    max-width: 100%;
 }
 
-#practice-screen header > div:last-child { 
-    flex: 0 0 44px;
-    display: flex;
-    justify-content: flex-end;
+/* 큰 폰트 모드에서 제목 크기 조정 */
+body.font-xlarge #practice-screen header h2 {
+    font-size: 1.1em; /* 아주 큰 폰트에서 더 작게 */
 }
 
+body.font-large #practice-screen header h2 {
+    font-size: 1.2em; /* 큰 폰트에서 조금 작게 */
+}
 
-/* 테스트용 - 연습 화면 헤더를 빨간색으로 */
+/* 테스트용 빨간색 제거하고 정상 색상으로 복구 */
 #practice-screen header {
-    background-color: red !important;
+    background-color: white !important; /* 빨간색 제거 */
 }
 
 #practice-screen header h2 {
-    color: white !important;
-    font-size: 0.8em !important;
+    color: #333 !important; /* 흰색 글자 제거하고 정상 색상 */
+    /* font-size는 위에서 이미 정의했으므로 제거 */
 }
+
+
+
