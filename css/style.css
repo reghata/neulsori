@@ -52,7 +52,7 @@ body.font-large header h2 {
 
 /* ===== 메인 메뉴 (홈 화면) ===== */
 .main-menu { display: flex; flex-direction: column; gap: 20px; max-width: 400px; margin: 50px auto; padding: 0 20px; }
-.menu-btn { display: flex; align-items: center; gap: 20px; padding: 30px; background-color: white; border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s; font-size: 1.1em; min-height: 80px; box-sizing: border-box; }
+.menu-btn { display: flex; align-items: center; gap: 20px; padding: 15px; background-color: white; border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s; font-size: 1em; min-height: 30px; box-sizing: border-box; }
 .menu-btn:active { transform: scale(0.98); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .menu-btn .icon { font-size: 2em; }
 

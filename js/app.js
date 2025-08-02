@@ -886,3 +886,26 @@ function convertEmojiToText(text) {
     
     return result.trim();
 }
+
+/* 설정 화면에서 뒤로가기 - 홈에서 온 경우와 다른 화면에서 온 경우 구분 */
+function goBackFromSettings() {
+    try {
+        /* 홈 화면에서 설정으로 온 경우 홈으로, 다른 화면에서 온 경우 이전 화면으로 */
+        if (previousScreen && previousScreen !== 'home-screen') {
+            if (previousScreen === 'practice-list-screen' && previousPracticeMode) {
+                showScreen(previousScreen, previousPracticeMode);
+            } else {
+                showScreen(previousScreen);
+            }
+        } else {
+            showScreen('home-screen');
+        }
+        
+        /* previousScreen 초기화 */
+        previousScreen = 'home-screen';
+        previousPracticeMode = '';
+    } catch (error) {
+        console.error('설정 화면 뒤로가기 오류:', error);
+        showScreen('home-screen'); /* 오류 시 홈으로 */
+    }
+}

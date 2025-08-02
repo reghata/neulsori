@@ -29,9 +29,7 @@
                     </h1>
                 </div>
                 <div></div>
-                <div>
-                    <button class="icon-btn" onclick="goToSettings('home-screen')">⚙️</button>
-                </div>
+                <div></div>
             </header>
         </div>
         <div class="main-menu">
@@ -46,6 +44,10 @@
             <button class="menu-btn" onclick="showScreen('practice-list-screen', 'shadowing')">
                 <span class="icon">🎙️</span>
                 <span>따라말하기 연습</span>
+            </button>
+            <button class="menu-btn" onclick="showScreen('settings-screen')">
+                <span class="icon">⚙️</span>
+                <span>설정</span>
             </button>
             <button class="menu-btn" onclick="showScreen('help-screen')">
                 <span class="icon">❓</span>
@@ -331,7 +333,7 @@
     <!-- 설정 화면 -->
     <div id="settings-screen" class="screen">
         <header>
-            <button class="icon-btn" onclick="returnToPreviousScreen()">←</button>
+            <button class="icon-btn" onclick="goBackFromSettings()">←</button>
             <h2>설정</h2>
             <div></div>
         </header>
