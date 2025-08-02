@@ -1,5 +1,5 @@
 // 전역 변수
-const SPEECH_RATES = { 'normal': 1.0, 'slow': 0.7, 'verySlow': 0.5 };
+const SPEECH_RATES = { 'normal': 1.0, 'slow': 0.5, 'verySlow': 0.1 };
 let storage;
 let currentSortOrder = 'alphabet';
 let speechRate = 0.85;
@@ -14,6 +14,9 @@ let practiceWord = { text: '', id: null, isVisible: false };
 let currentPracticeMode = '';
 let recognition;
 let currentEditingWordId = null;
+let previousScreen = 'home-screen';
+let previousPracticeMode = '';
+let currentHelpAudioBtn = null;
 
 window.onload = function() {
     try {
@@ -124,6 +127,11 @@ function selectVoiceByGender(gender) {
 
 function showScreen(screenId, practiceMode = null) {
     try {
+        /* 도움말 화면을 벗어날 때 음성 중단 */
+        if (document.querySelector('.screen.active')?.id === 'help-screen' && screenId !== 'help-screen') {
+            stopHelpAudio();
+        }
+        
         if (isEditMode && screenId !== 'conversation-screen') {
             toggleEditMode(false);
         }
@@ -693,4 +701,188 @@ function handleVersionClick() {
     } catch (error) {
         console.error('버전 클릭 처리 오류:', error);
     }
+}
+
+
+/* 설정 화면으로 이동하면서 이전 화면 기억 */
+function goToSettings(fromScreen) {
+    try {
+        /* 도움말 화면에서 나갈 때 음성 중단 */
+        if (fromScreen === 'help-screen') {
+            stopHelpAudio();
+        }
+        
+        previousScreen = fromScreen;
+        if (fromScreen === 'practice-list-screen') {
+            previousPracticeMode = currentPracticeMode;
+        }
+        showScreen('settings-screen');
+    } catch (error) {
+        console.error('설정 이동 오류:', error);
+    }
+}
+
+/* 설정 화면에서 이전 화면으로 돌아가기 */
+function returnToPreviousScreen() {
+    try {
+        if (previousScreen === 'practice-list-screen' && previousPracticeMode) {
+            showScreen(previousScreen, previousPracticeMode);
+        } else {
+            showScreen(previousScreen);
+        }
+    } catch (error) {
+        console.error('이전 화면 복귀 오류:', error);
+        showScreen('home-screen'); /* 오류 시 홈으로 */
+    }
+}
+
+/* 도움말 음성 중단 함수 */
+function stopHelpAudio() {
+    if (currentHelpAudioBtn) {
+        window.speechSynthesis.cancel();
+        currentHelpAudioBtn.classList.remove('playing');
+        currentHelpAudioBtn = null;
+    }
+}
+
+
+/* 화면의 실제 텍스트를 그대로 읽어주는 함수 (이모티콘 제거 + 토글 기능) */
+function speakHelpSectionDirect() {
+    try {
+        /* 현재 버튼 찾기 */
+        const currentBtn = event.target;
+        
+        /* 이미 재생 중인 버튼을 다시 누른 경우 음성 중단 */
+        if (currentHelpAudioBtn === currentBtn) {
+            window.speechSynthesis.cancel();
+            currentBtn.classList.remove('playing');
+            currentHelpAudioBtn = null;
+            return;
+        }
+        
+        /* 이전 음성 중지 */
+        window.speechSynthesis.cancel();
+        
+        /* 이전 버튼 상태 초기화 */
+        if (currentHelpAudioBtn) {
+            currentHelpAudioBtn.classList.remove('playing');
+        }
+        
+        /* 현재 버튼을 재생 중으로 설정 */
+        currentHelpAudioBtn = currentBtn;
+        
+        /* 해당 섹션의 실제 텍스트 추출 */
+        const section = currentBtn.closest('.help-section');
+        if (!section) return;
+        
+        /* 텍스트 내용 추출 (HTML 태그 제거) */
+        let text = '';
+        
+        /* 제목 추가 (이모티콘을 텍스트로 변환) */
+        const title = section.querySelector('h3');
+        if (title) {
+            const titleText = convertEmojiToText(title.textContent);
+            text += titleText + '. ';
+        }
+        
+        /* 모든 p, h4, li 태그의 텍스트 추출 (이모티콘을 텍스트로 변환) */
+        const textElements = section.querySelectorAll('p, h4, li');
+        textElements.forEach(element => {
+            const elementText = convertEmojiToText(element.textContent.trim());
+            if (elementText) {
+                text += elementText + '. ';
+            }
+        });
+        
+        /* 불필요한 기호들 정리 */
+        text = text.replace(/•/g, '').replace(/\s+/g, ' ').trim();
+        
+        if (!text) {
+            console.error('읽을 텍스트가 없습니다.');
+            currentHelpAudioBtn = null;
+            return;
+        }
+        
+        /* 음성 합성 객체 생성 */
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        utterance.rate = speechRate;
+        
+        /* 음성 설정 적용 */
+        const allVoices = window.speechSynthesis.getVoices();
+        if (allVoices.length > 0 && selectedVoiceIndex !== -1 && allVoices[selectedVoiceIndex]) {
+            utterance.voice = allVoices[selectedVoiceIndex];
+        }
+        
+        /* 재생 시작 이벤트 */
+        utterance.onstart = () => {
+            currentBtn.classList.add('playing');
+        };
+        
+        /* 재생 완료 이벤트 */
+        utterance.onend = () => {
+            currentBtn.classList.remove('playing');
+            currentHelpAudioBtn = null;
+        };
+        
+        /* 재생 오류 이벤트 */
+        utterance.onerror = (event) => {
+            console.error('음성 재생 오류:', event.error);
+            currentBtn.classList.remove('playing');
+            currentHelpAudioBtn = null;
+        };
+        
+        /* 음성 재생 시작 */
+        window.speechSynthesis.speak(utterance);
+        
+    } catch (error) {
+        console.error('도움말 음성 재생 오류:', error);
+        if (currentHelpAudioBtn) {
+            currentHelpAudioBtn.classList.remove('playing');
+            currentHelpAudioBtn = null;
+        }
+    }
+}
+/* 특정 이모티콘을 텍스트로 변환하는 함수 */
+function convertEmojiToText(text) {
+    const emojiMap = {
+        '🎤': '마이크',
+        '✏️': '연필',
+        '🗑️': '휴지통',
+        '⭐': '별표',
+        '☆': '빈별표',
+        '🔊': ' ',
+        '➕': '플러스',
+        '🗣️': ' ',
+        '📖': ' ',
+        '🎙️': ' ',
+        '❓': ' ',
+        '⚙️': '설정',
+        '💡': ' ',
+        '🆘': ' ',
+        '📞': ' ',
+        '🏠': ' ',
+        '←': ' ',
+        '✓': '체크'
+    };
+    
+    let result = text;
+    
+    /* 이모티콘 맵의 각 항목을 텍스트로 변환 */
+    for (const [emoji, word] of Object.entries(emojiMap)) {
+        /* 정규식 특수문자 이스케이프 처리 */
+        const escapedEmoji = emoji.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        result = result.replace(new RegExp(escapedEmoji, 'g'), word);
+    }
+    
+    /* + 기호는 별도로 처리 */
+    result = result.replace(/\+/g, '플러스');
+    
+    /* 불릿 포인트 제거 */
+    result = result.replace(/•/g, '');
+    
+    /* 나머지 불필요한 이모티콘들은 제거 */
+    result = result.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
+    
+    return result.trim();
 }
