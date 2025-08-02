@@ -17,6 +17,141 @@ let currentEditingWordId = null;
 let previousScreen = 'home-screen';
 let previousPracticeMode = '';
 let currentHelpAudioBtn = null;
+let audioInitialized = false;
+
+
+/* 음성 재생 권한 초기화 함수 */
+function initializeAudio() {
+    if (!audioInitialized) {
+        /* 빈 음성 재생으로 권한 활성화 */
+        const utterance = new SpeechSynthesisUtterance('');
+        utterance.volume = 0; /* 무음으로 재생 */
+        window.speechSynthesis.speak(utterance);
+        audioInitialized = true;
+    }
+}
+
+// 음성 초기화 함수
+function initializeVoices() {
+    try {
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+    } catch (error) {
+        console.error('음성 초기화 오류:', error);
+    }
+}
+
+// 음성 목록 로드
+function loadVoices() {
+    try {
+        voices = window.speechSynthesis.getVoices();
+        selectVoiceByGender(voiceGender);
+    } catch (error) {
+        console.error('음성 로드 오류:', error);
+    }
+}
+
+
+// 성별에 따른 음성 선택
+function selectVoiceByGender(gender) {
+    try {
+        const allVoices = window.speechSynthesis.getVoices();
+        if (allVoices.length === 0) return;
+        
+        let selectedVoice = null;
+        
+        // 한국어 음성 찾기
+        const koreanVoices = allVoices.filter(voice => voice.lang.includes('ko'));
+        
+        if (koreanVoices.length > 0) {
+            if (gender === 'female') {
+                selectedVoice = koreanVoices.find(voice => 
+                    voice.name.includes('Female') || voice.name.includes('여성') || 
+                    voice.name.includes('Yuna') || voice.name.includes('Sora')
+                ) || koreanVoices[0];
+            } else {
+                selectedVoice = koreanVoices.find(voice => 
+                    voice.name.includes('Male') || voice.name.includes('남성') || 
+                    voice.name.includes('Minsu') || voice.name.includes('Jinho')
+                ) || koreanVoices[0];
+            }
+        } else {
+            // 한국어 음성이 없으면 첫 번째 음성 사용
+            selectedVoice = allVoices[0];
+        }
+        
+        if (selectedVoice) {
+            selectedVoiceIndex = allVoices.indexOf(selectedVoice);
+        }
+    } catch (error) {
+        console.error('음성 선택 오류:', error);
+        selectedVoiceIndex = 0;
+    }
+}
+
+
+/* 기존 speak 함수 수정 */
+function speak(text, wordId) {
+    try {
+        /* 첫 번째 음성 재생 시 권한 초기화 */
+        initializeAudio();
+        
+        if (wordId) storage.incrementUseCount(wordId);
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        utterance.rate = speechRate;
+        
+        const allVoices = window.speechSynthesis.getVoices();
+        if (allVoices.length > 0 && selectedVoiceIndex !== -1 && allVoices[selectedVoiceIndex]) {
+            utterance.voice = allVoices[selectedVoiceIndex];
+        }
+        
+        utterance.onstart = () => {
+            if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
+            const item = Array.from(document.querySelectorAll('.word-item')).find(el => el.querySelector('.word-text')?.textContent === text);
+            if (item) { 
+                item.classList.add('playing'); 
+                currentPlayingItem = item; 
+            }
+        };
+        
+        utterance.onend = () => {
+            if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
+            currentPlayingItem = null;
+        };
+        
+        /* 재생 실패 시 사용자에게 알림 */
+        utterance.onerror = (event) => {
+            console.error('음성 재생 오류:', event.error);
+            if (!audioInitialized) {
+                alert('음성 재생을 위해 화면을 한 번 터치해주세요.');
+            }
+        };
+        
+        window.speechSynthesis.speak(utterance);
+    } catch (error) {
+        console.error('음성 출력 오류:', error);
+        alert('음성 재생이 지원되지 않는 브라우저입니다. Chrome 브라우저를 사용해주세요.');
+    }
+}
+
+/* 스플래시 화면에서 앱 시작 함수 */
+function startApp() {
+    try {
+        /* 음성 재생 권한 활성화 */
+        initializeAudio();
+        
+        document.getElementById('splash-screen').classList.remove('active');
+        showScreen('home-screen');
+    } catch (error) {
+        console.error('앱 시작 오류:', error);
+        /* 오류가 발생해도 홈 화면으로 이동 */
+        location.reload();
+    }
+}
 
 window.onload = function() {
     try {
@@ -58,64 +193,6 @@ window.onload = function() {
     }
 };
 
-// 음성 초기화 함수
-function initializeVoices() {
-    try {
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-            window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
-        loadVoices();
-    } catch (error) {
-        console.error('음성 초기화 오류:', error);
-    }
-}
-
-// 음성 목록 로드
-function loadVoices() {
-    try {
-        voices = window.speechSynthesis.getVoices();
-        selectVoiceByGender(voiceGender);
-    } catch (error) {
-        console.error('음성 로드 오류:', error);
-    }
-}
-
-// 성별에 따른 음성 선택
-function selectVoiceByGender(gender) {
-    try {
-        const allVoices = window.speechSynthesis.getVoices();
-        if (allVoices.length === 0) return;
-        
-        let selectedVoice = null;
-        
-        // 한국어 음성 찾기
-        const koreanVoices = allVoices.filter(voice => voice.lang.includes('ko'));
-        
-        if (koreanVoices.length > 0) {
-            if (gender === 'female') {
-                selectedVoice = koreanVoices.find(voice => 
-                    voice.name.includes('Female') || voice.name.includes('여성') || 
-                    voice.name.includes('Yuna') || voice.name.includes('Sora')
-                ) || koreanVoices[0];
-            } else {
-                selectedVoice = koreanVoices.find(voice => 
-                    voice.name.includes('Male') || voice.name.includes('남성') || 
-                    voice.name.includes('Minsu') || voice.name.includes('Jinho')
-                ) || koreanVoices[0];
-            }
-        } else {
-            // 한국어 음성이 없으면 첫 번째 음성 사용
-            selectedVoice = allVoices[0];
-        }
-        
-        if (selectedVoice) {
-            selectedVoiceIndex = allVoices.indexOf(selectedVoice);
-        }
-    } catch (error) {
-        console.error('음성 선택 오류:', error);
-        selectedVoiceIndex = 0;
-    }
-}
 
 function showScreen(screenId, practiceMode = null) {
     try {
@@ -441,39 +518,6 @@ function levenshteinDistance(a, b) {
         }
     }
     return matrix[b.length][a.length];
-}
-
-function speak(text, wordId) {
-    try {
-        if (wordId) storage.incrementUseCount(wordId);
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'ko-KR';
-        utterance.rate = speechRate;
-        
-        const allVoices = window.speechSynthesis.getVoices();
-        if (allVoices.length > 0 && selectedVoiceIndex !== -1 && allVoices[selectedVoiceIndex]) {
-            utterance.voice = allVoices[selectedVoiceIndex];
-        }
-        
-        utterance.onstart = () => {
-            if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
-            const item = Array.from(document.querySelectorAll('.word-item')).find(el => el.querySelector('.word-text')?.textContent === text);
-            if (item) { 
-                item.classList.add('playing'); 
-                currentPlayingItem = item; 
-            }
-        };
-        
-        utterance.onend = () => {
-            if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
-            currentPlayingItem = null;
-        };
-        
-        window.speechSynthesis.speak(utterance);
-    } catch (error) {
-        console.error('음성 출력 오류:', error);
-    }
 }
 
 function toggleFavorite(wordId, event) {
@@ -899,17 +943,5 @@ function goBackFromSettings() {
     } catch (error) {
         console.error('설정 화면 뒤로가기 오류:', error);
         showScreen('home-screen'); /* 오류 시 홈으로 */
-    }
-}
-
-/* 스플래시 화면에서 앱 시작 함수 */
-function startApp() {
-    try {
-        document.getElementById('splash-screen').classList.remove('active');
-        showScreen('home-screen');
-    } catch (error) {
-        console.error('앱 시작 오류:', error);
-        /* 오류가 발생해도 홈 화면으로 이동 */
-        location.reload();
     }
 }
