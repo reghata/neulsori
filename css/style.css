@@ -355,3 +355,13 @@ body.font-large #practice-screen header > h2 {
 #practice-screen header h2 {
     font-size: inherit; /* 위에서 정의한 크기 사용 */
 }
+
+/* ===== 실제로 작동하는 이메일 줄바꿈 처리 ===== */
+/* 도움말의 마지막 섹션(문의하기)과 설정의 정보 섹션 */
+.help-section:last-child p,
+#settings-screen div:last-child p {
+    word-wrap: break-word;
+    word-break: break-all;
+    overflow-wrap: break-word;
+}
+
