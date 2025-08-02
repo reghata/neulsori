@@ -325,3 +325,12 @@ body.font-large header h2 {
 }
 
 
+/* 테스트용 - 연습 화면 헤더를 빨간색으로 */
+#practice-screen header {
+    background-color: red !important;
+}
+
+#practice-screen header h2 {
+    color: white !important;
+    font-size: 0.8em !important;
+}
