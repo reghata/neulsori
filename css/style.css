@@ -222,7 +222,7 @@ body.font-large header h2 {
 
 .help-section strong {
     color: #333;
-
+}
     /* ===== 헤더 레이아웃 개선 (전체 화면) ===== */
 /* 뒤로가기 버튼: 최소 필요 공간만 */
 #conversation-screen header > *:first-child,
