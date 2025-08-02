@@ -20,24 +20,67 @@ let currentHelpAudioBtn = null;
 let audioInitialized = false;
 
 
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
 /* 음성 재생 권한 초기화 함수 */
 function initializeAudio() {
-    if (!audioInitialized) {
-        /* 빈 음성 재생으로 권한 활성화 */
-        const utterance = new SpeechSynthesisUtterance('');
-        utterance.volume = 0; /* 무음으로 재생 */
-        window.speechSynthesis.speak(utterance);
-        audioInitialized = true;
+    if (!isIOS()) {
+        // 안드로이드: 기존 로직 완전 보존
+        if (!audioInitialized) {
+            const utterance = new SpeechSynthesisUtterance('');
+            utterance.volume = 0;
+            window.speechSynthesis.speak(utterance);
+            audioInitialized = true;
+        }
+    } else {
+        // iOS: 새로운 로직
+        if (!audioInitialized) {
+            try {
+                const utterance = new SpeechSynthesisUtterance('');
+                utterance.volume = 0;
+                window.speechSynthesis.speak(utterance);
+                audioInitialized = true;
+                console.log('iOS TTS 사용자 상호작용 초기화 완료');
+            } catch (error) {
+                console.error('iOS TTS 초기화 실패:', error);
+            }
+        }
     }
 }
 
-// 음성 초기화 함수
+
 function initializeVoices() {
     try {
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-            window.speechSynthesis.onvoiceschanged = loadVoices;
+        if (isIOS()) {
+            // iOS 전용 초기화
+            window.speechSynthesis.cancel();
+            const voices = window.speechSynthesis.getVoices();
+            
+            if (voices.length > 0) {
+                console.log('iOS 음성 로드 완료:', voices.length, '개');
+                selectVoiceByGender(voiceGender);
+            } else {
+                if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                    window.speechSynthesis.onvoiceschanged = () => {
+                        const loadedVoices = window.speechSynthesis.getVoices();
+                        if (loadedVoices.length > 0) {
+                            selectVoiceByGender(voiceGender);
+                            console.log('iOS 음성 지연 로드 완료:', loadedVoices.length, '개');
+                            window.speechSynthesis.onvoiceschanged = null;
+                        }
+                    };
+                }
+                window.speechSynthesis.getVoices(); // 강제 로드 시도
+            }
+        } else {
+            // 기존 안드로이드/기타 초기화 방식 유지
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }
+            loadVoices();
         }
-        loadVoices();
     } catch (error) {
         console.error('음성 초기화 오류:', error);
     }
@@ -47,13 +90,15 @@ function initializeVoices() {
 function loadVoices() {
     try {
         voices = window.speechSynthesis.getVoices();
-        selectVoiceByGender(voiceGender);
+        if (voices.length > 0) {
+            selectVoiceByGender(voiceGender);
+            console.log('음성 로드 완료:', voices.length, '개');
+        }
     } catch (error) {
         console.error('음성 로드 오류:', error);
     }
 }
 
-// 성별에 따른 음성 선택 수정 (디버깅 정보 포함)
 function selectVoiceByGender(gender) {
     try {
         const allVoices = window.speechSynthesis.getVoices();
@@ -62,15 +107,14 @@ function selectVoiceByGender(gender) {
             return;
         }
         
-        // 모든 음성 로그 출력 (디버깅용)
         console.log('=== 사용 가능한 모든 음성 ===');
         allVoices.forEach((voice, index) => {
-            console.log(`${index}: ${voice.name} (${voice.lang}) - ${voice.gender || 'gender정보없음'}`);
+            console.log(`${index}: ${voice.name} (${voice.lang})`);
         });
         
         let selectedVoice = null;
         
-        // 한국어 음성 찾기 (더 넓은 조건)
+        // 한국어 음성 찾기
         const koreanVoices = allVoices.filter(voice => {
             const lang = voice.lang.toLowerCase();
             const name = voice.name.toLowerCase();
@@ -87,45 +131,54 @@ function selectVoiceByGender(gender) {
         
         if (koreanVoices.length > 0) {
             if (gender === 'female') {
-                // 여성 음성 찾기 (다양한 패턴으로 검색)
+                // 여성 음성 찾기 (한글/영문 모두 지원)
                 selectedVoice = koreanVoices.find(voice => {
                     const name = voice.name.toLowerCase();
                     return name.includes('female') || 
                            name.includes('여성') || 
                            name.includes('woman') ||
+                           // 기존 영문 패턴
                            name.includes('yuna') || 
                            name.includes('sora') ||
                            name.includes('heami') ||
                            name.includes('seoyeon') ||
                            name.includes('kyuri') ||
-                           // 브라우저별 여성 음성 패턴
+                           // iOS 한글 패턴 추가
+                           name.includes('유나') ||
+                           name.includes('소라') ||
+                           name.includes('헤아미') ||
+                           name.includes('서연') ||
+                           name.includes('규리') ||
+                           // 기타 패턴
                            name.includes('nanum') ||
-                           name.includes('기본 여성') ||
-                           // 첫 번째가 보통 여성인 경우가 많음
-                           (voice === koreanVoices[0] && koreanVoices.length > 1);
+                           name.includes('기본 여성');
                 });
                 
-                // 여성 음성을 찾지 못했으면 첫 번째 한국어 음성 사용
                 if (!selectedVoice) {
                     selectedVoice = koreanVoices[0];
                     console.log('여성 음성을 찾지 못해 첫 번째 한국어 음성 사용');
                 }
             } else { // male
-                // 남성 음성 찾기
+                // 남성 음성 찾기 (한글/영문 모두 지원)
                 selectedVoice = koreanVoices.find(voice => {
                     const name = voice.name.toLowerCase();
                     return name.includes('male') || 
                            name.includes('남성') || 
                            name.includes('man') ||
+                           // 기존 영문 패턴
                            name.includes('minsu') || 
                            name.includes('jinho') ||
                            name.includes('inho') ||
                            name.includes('woosik') ||
-                           // 브라우저별 남성 음성 패턴
+                           // iOS 한글 패턴 추가
+                           name.includes('민수') ||
+                           name.includes('진호') ||
+                           name.includes('인호') ||
+                           name.includes('우식') ||
+                           // 기타 패턴
                            name.includes('기본 남성');
                 });
                 
-                // 남성 음성을 찾지 못했으면 두 번째 한국어 음성 시도
                 if (!selectedVoice) {
                     if (koreanVoices.length > 1) {
                         selectedVoice = koreanVoices[1];
@@ -139,7 +192,7 @@ function selectVoiceByGender(gender) {
         } else {
             // 한국어 음성이 없으면 기본 음성 사용
             selectedVoice = allVoices[0];
-            console.log('한국어 음성을 찾을 수 없어 기본 음성 사용:', selectedVoice.name);
+            console.log('한국어 음성을 찾을 수 없어 기본 음성 사용:', selectedVoice?.name);
         }
         
         if (selectedVoice) {
@@ -148,6 +201,7 @@ function selectVoiceByGender(gender) {
             console.log(`이름: ${selectedVoice.name}`);
             console.log(`언어: ${selectedVoice.lang}`);
             console.log(`인덱스: ${selectedVoiceIndex}`);
+            console.log(`플랫폼: ${isIOS() ? 'iOS' : 'Android/Other'}`);
         } else {
             console.error('음성 선택 실패');
             selectedVoiceIndex = 0;
@@ -161,7 +215,7 @@ function selectVoiceByGender(gender) {
 // 음성 성별 변경 함수 수정 (즉시 테스트 포함)
 function changeVoiceGender(gender) {
     try {
-        console.log(`음성 성별을 ${gender}로 변경 시도`);
+        console.log(`${isIOS() ? 'iOS' : 'Android'} 환경에서 음성 성별을 ${gender}로 변경 시도`);
         
         storage.updateSettings({ voiceGender: gender });
         voiceGender = gender;
@@ -176,26 +230,37 @@ function changeVoiceGender(gender) {
     }
 }
 
-/* 기존 speak 함수 수정 */
 function speak(text, wordId) {
     try {
-        /* 첫 번째 음성 재생 시 권한 초기화 */
-        initializeAudio();
+        // iOS 첫 실행 시 사용자 상호작용으로 초기화
+        if (isIOS() && !audioInitialized) {
+            initializeAudio();
+        }
         
         if (wordId) storage.incrementUseCount(wordId);
         window.speechSynthesis.cancel();
+        
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'ko-KR';
         utterance.rate = speechRate;
         
+        // iOS 전용 추가 설정
+        if (isIOS()) {
+            utterance.volume = 1.0;
+            utterance.pitch = 1.0;
+        }
+        
         const allVoices = window.speechSynthesis.getVoices();
         if (allVoices.length > 0 && selectedVoiceIndex !== -1 && allVoices[selectedVoiceIndex]) {
             utterance.voice = allVoices[selectedVoiceIndex];
+            console.log('사용 중인 음성:', allVoices[selectedVoiceIndex].name);
         }
         
         utterance.onstart = () => {
             if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
-            const item = Array.from(document.querySelectorAll('.word-item')).find(el => el.querySelector('.word-text')?.textContent === text);
+            const item = Array.from(document.querySelectorAll('.word-item')).find(el => 
+                el.querySelector('.word-text')?.textContent === text
+            );
             if (item) { 
                 item.classList.add('playing'); 
                 currentPlayingItem = item; 
@@ -207,35 +272,57 @@ function speak(text, wordId) {
             currentPlayingItem = null;
         };
         
-        /* 재생 실패 시 사용자에게 알림 */
         utterance.onerror = (event) => {
             console.error('음성 재생 오류:', event.error);
-            if (!audioInitialized) {
+            if (currentPlayingItem) currentPlayingItem.classList.remove('playing');
+            currentPlayingItem = null;
+            
+            if (event.error === 'network') {
+                console.log('네트워크 오류로 인한 음성 재생 실패');
+            }
+            if (!audioInitialized && isIOS()) {
                 alert('음성 재생을 위해 화면을 한 번 터치해주세요.');
             }
         };
         
-        window.speechSynthesis.speak(utterance);
+        // iOS에서만 약간의 지연, 안드로이드는 기존 방식 유지
+        if (isIOS()) {
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterance);
+            }, 10);
+        } else {
+            window.speechSynthesis.speak(utterance);
+        }
+        
     } catch (error) {
         console.error('음성 출력 오류:', error);
-        alert('음성 재생이 지원되지 않는 브라우저입니다. Chrome 브라우저를 사용해주세요.');
+        if (isIOS()) {
+            alert('iOS에서 음성 재생 중 오류가 발생했습니다.');
+        } else {
+            alert('음성 재생이 지원되지 않는 브라우저입니다. Chrome 브라우저를 사용해주세요.');
+        }
     }
 }
 
-/* 스플래시 화면에서 앱 시작 함수 */
 function startApp() {
     try {
-        /* 음성 재생 권한 활성화 */
-        initializeAudio();
+        // 기존 안드로이드 동작 완전 보존
+        if (!isIOS()) {
+            // 안드로이드에서는 기존 방식 그대로
+            initializeAudio();
+        } else {
+            // iOS에서만 새로운 방식
+            initializeAudio();
+        }
         
         document.getElementById('splash-screen').classList.remove('active');
         showScreen('home-screen');
     } catch (error) {
         console.error('앱 시작 오류:', error);
-        /* 오류가 발생해도 홈 화면으로 이동 */
         location.reload();
     }
 }
+
 
 window.onload = function() {
     try {
