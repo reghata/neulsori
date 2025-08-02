@@ -222,5 +222,38 @@ body.font-large header h2 {
 
 .help-section strong {
     color: #333;
+
+    /* ===== 헤더 레이아웃 개선 (전체 화면) ===== */
+/* 뒤로가기 버튼: 최소 필요 공간만 */
+#conversation-screen header > *:first-child,
+#practice-list-screen header > *:first-child,
+#practice-screen header > *:first-child,
+#help-screen header > *:first-child,
+#settings-screen header > *:first-child { 
+    flex: 0 0 50px; 
+}
+
+/* 제목: 남은 공간 대부분 차지 */
+#conversation-screen header > *:nth-child(2),
+#practice-list-screen header > *:nth-child(2),
+#practice-screen header > *:nth-child(2),
+#help-screen header > *:nth-child(2),
+#settings-screen header > *:nth-child(2) { 
+    flex: 1; 
+}
+
+/* 우측 버튼들: 충분한 터치 영역 확보 */
+#conversation-screen header > *:last-child,
+#practice-list-screen header > *:last-child,
+#practice-screen header > *:last-child,
+#help-screen header > *:last-child,
+#settings-screen header > *:last-child { 
+    flex: 0 0 80px; 
+}
+
+/* 홈 화면은 기존 유지 (로고가 있어서 다른 레이아웃) */
+#home-screen header > * { 
+    flex: 1; 
+}
     font-weight: bold;
 }
