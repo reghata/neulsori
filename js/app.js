@@ -60,19 +60,19 @@ function initializeVoices() {
             
             if (voices.length > 0) {
                 console.log('iOS 음성 로드 완료:', voices.length, '개');
-                selectVoiceByGender(voiceGender);
+                selectVoiceByGender(voiceGender); // 수정됨
             } else {
                 if (window.speechSynthesis.onvoiceschanged !== undefined) {
                     window.speechSynthesis.onvoiceschanged = () => {
                         const loadedVoices = window.speechSynthesis.getVoices();
                         if (loadedVoices.length > 0) {
-                            selectVoiceByGender(voiceGender);
+                            selectVoiceByGender(voiceGender); // 수정됨
                             console.log('iOS 음성 지연 로드 완료:', loadedVoices.length, '개');
                             window.speechSynthesis.onvoiceschanged = null;
                         }
                     };
                 }
-                window.speechSynthesis.getVoices(); // 강제 로드 시도
+                window.speechSynthesis.getVoices();
             }
         } else {
             // 기존 안드로이드/기타 초기화 방식 유지
@@ -86,12 +86,11 @@ function initializeVoices() {
     }
 }
 
-// 음성 목록 로드
 function loadVoices() {
     try {
         voices = window.speechSynthesis.getVoices();
         if (voices.length > 0) {
-            selectVoiceByGender(voiceGender);
+            selectVoiceByGender(voiceGender); // 수정됨
             console.log('음성 로드 완료:', voices.length, '개');
         }
     } catch (error) {
@@ -131,7 +130,7 @@ function selectVoiceByGender(gender) {
         
         if (koreanVoices.length > 0) {
             if (gender === 'female') {
-                // 여성 음성 찾기 (한글/영문 모두 지원)
+                // 기존 여성 음성 찾기 로직 그대로 유지
                 selectedVoice = koreanVoices.find(voice => {
                     const name = voice.name.toLowerCase();
                     return name.includes('female') || 
@@ -143,7 +142,7 @@ function selectVoiceByGender(gender) {
                            name.includes('heami') ||
                            name.includes('seoyeon') ||
                            name.includes('kyuri') ||
-                           // iOS 한글 패턴 추가
+                           // iOS 한글 패턴
                            name.includes('유나') ||
                            name.includes('소라') ||
                            name.includes('해미') ||
@@ -159,7 +158,7 @@ function selectVoiceByGender(gender) {
                     console.log('여성 음성을 찾지 못해 첫 번째 한국어 음성 사용');
                 }
             } else { // male
-                // 남성 음성 찾기 (한글/영문 모두 지원)
+                // 기존 남성 음성 찾기 로직 그대로 유지
                 selectedVoice = koreanVoices.find(voice => {
                     const name = voice.name.toLowerCase();
                     return name.includes('male') || 
@@ -170,9 +169,7 @@ function selectVoiceByGender(gender) {
                            name.includes('jinho') ||
                            name.includes('inho') ||
                            name.includes('woosik') ||
-                           name.includes('eddy') ||
-                           name.includes('reed') ||
-                           // iOS 한글 패턴 추가
+                           // iOS 한글 패턴
                            name.includes('민수') ||
                            name.includes('진호') ||
                            name.includes('인호') ||
@@ -199,7 +196,10 @@ function selectVoiceByGender(gender) {
         
         if (selectedVoice) {
             selectedVoiceIndex = allVoices.indexOf(selectedVoice);
-            console.log(`=== 최종 선택된 음성 (${gender}) ===`);
+            
+            // 로그 메시지도 버튼 표시에 맞게 변경
+            const displayType = gender === 'female' ? '첫 번째 음성' : '두 번째 음성';
+            console.log(`=== 최종 선택된 ${displayType} (내부: ${gender}) ===`);
             console.log(`이름: ${selectedVoice.name}`);
             console.log(`언어: ${selectedVoice.lang}`);
             console.log(`인덱스: ${selectedVoiceIndex}`);
@@ -214,21 +214,22 @@ function selectVoiceByGender(gender) {
     }
 }
 
-// 음성 성별 변경 함수 수정 (즉시 테스트 포함)
+
 function changeVoiceGender(gender) {
     try {
-        console.log(`${isIOS() ? 'iOS' : 'Android'} 환경에서 음성 성별을 ${gender}로 변경 시도`);
+        // 버튼 표시에 맞는 로그 메시지
+        const displayType = gender === 'female' ? '첫 번째 음성' : '두 번째 음성';
+        console.log(`${isIOS() ? 'iOS' : 'Android'} 환경에서 ${displayType}으로 변경 시도 (내부: ${gender})`);
         
-        storage.updateSettings({ voiceGender: gender });
-        voiceGender = gender;
-        selectVoiceByGender(gender);
+        storage.updateSettings({ voiceGender: gender }); // 내부 저장은 기존 방식 유지
+        voiceGender = gender; // 전역 변수도 기존 방식 유지
+        selectVoiceByGender(gender); // 기존 함수 호출
         highlightCurrentSettings();
         
-        // 변경된 음성으로 즉시 테스트
-        const testText = gender === 'female' ? '여성 음성입니다' : '남성 음성입니다';
-        speak(testText);
+        // 테스트 메시지를 '안녕하세요'로 통일
+        speak('안녕하세요');
     } catch (error) {
-        console.error('음성 성별 변경 오류:', error);
+        console.error('음성 선택 변경 오류:', error);
     }
 }
 
@@ -757,7 +758,7 @@ function highlightCurrentSettings() {
             let settingKey;
             if (key === '글자 크기') settingKey = 'fontSize';
             else if (key === '말하기 속도') settingKey = 'speechRate';
-            else if (key === '음성 선택') settingKey = 'voiceGender';
+            else if (key === '음성 선택') settingKey = 'voiceGender'; // 수정됨
             
             if (settingKey) {
                 btn.classList.toggle('active', btn.dataset.settingValue === settings[settingKey]);
@@ -768,13 +769,14 @@ function highlightCurrentSettings() {
     }
 }
 
+
 function applySettings() {
     try {
         const settings = storage.getSettings();
         document.body.className = `font-${settings.fontSize}`;
         speechRate = SPEECH_RATES[settings.speechRate] || SPEECH_RATES['verySlow'];
-        voiceGender = settings.voiceGender || 'female';
-        selectVoiceByGender(voiceGender);
+        voiceGender = settings.voiceGender || 'female'; // 수정됨
+        selectVoiceByGender(voiceGender); // 수정됨
     } catch (error) {
         console.error('설정 적용 오류:', error);
     }

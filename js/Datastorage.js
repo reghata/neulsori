@@ -29,7 +29,7 @@ class DataStorage {
             settings: {
                 fontSize: 'xlarge',
                 speechRate: 'verySlow',
-                voiceGender: 'female'
+                voiceSelection: 'first'
             },
             nextId: 8 // ★★★ 단어 개수에 맞춰 이 숫자도 변경해주세요 (마지막 id + 1) ★★★
         };
