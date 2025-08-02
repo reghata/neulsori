@@ -108,9 +108,10 @@ body.font-large header h2 {
     background: #2196F3; /* 기본 파란색 */
     color: white;
     border-radius: 10px;
-    font-size: 0.9em;
+    font-size: 0.7em;
     cursor: pointer;
     transition: background-color 0.3s;
+    white-space: nowrap; 
 }
 
 #settings-screen button:active {
