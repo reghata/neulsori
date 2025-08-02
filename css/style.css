@@ -300,3 +300,28 @@ body.font-large header h2 {
     color: #333;
     font-weight: bold;
 }
+
+
+/* ===== 연습 화면 헤더 레이아웃 수정 ===== */
+#practice-screen header > button:first-child { 
+    flex: 0 0 44px;
+}
+
+#practice-screen header > h2 { 
+    flex: 1;
+    margin: 0;
+    font-size: 1.3em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 10px;
+}
+
+#practice-screen header > div:last-child { 
+    flex: 0 0 44px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+
