@@ -146,7 +146,7 @@ function selectVoiceByGender(gender) {
                            // iOS 한글 패턴 추가
                            name.includes('유나') ||
                            name.includes('소라') ||
-                           name.includes('헤아미') ||
+                           name.includes('해미') ||
                            name.includes('서연') ||
                            name.includes('규리') ||
                            // 기타 패턴
