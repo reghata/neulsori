@@ -175,18 +175,22 @@ body.font-large header h2 {
 .modal-buttons button.primary { background: #4CAF50; color: white; }
 
 /* ===== 설정 화면 ===== */
-/* header 안의 버튼은 제외하고, 설정 항목 버튼에만 스타일 적용하도록 수정 */
 #settings-screen > div > div button {
     width: 100%;
-    padding: 15px;
+    padding: 10px 8px;     /* 상하 10px, 좌우 8px */
     margin: 5px 0;
     border: none;
-    background: #2196F3; /* 기본 파란색 */
+    background: #2196F3;
     color: white;
     border-radius: 10px;
-    font-size: 0.9em;
+    font-size: 0.85em;     /* 약간 작은 폰트 */
     cursor: pointer;
     transition: background-color 0.3s;
+    
+    /* 줄바꿈 방지 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #settings-screen button:active {

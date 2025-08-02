@@ -27,8 +27,8 @@ class DataStorage {
                 { id: 7, text: '감사합니다', isFavorite: false, useCount: 0 }
             ],
             settings: {
-                fontSize: 'xlarge',
-                speechRate: 'verySlow',
+                fontSize: 'normal',
+                speechRate: 'normal',
                 voiceSelection: 'first'
             },
             nextId: 8 // ★★★ 단어 개수에 맞춰 이 숫자도 변경해주세요 (마지막 id + 1) ★★★
