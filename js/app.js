@@ -185,11 +185,9 @@ window.onload = function() {
             versionInfo.addEventListener('click', handleVersionClick);
         }
         
-        // 기존 자동 전환 코드 제거 - 이제 사용자가 직접 "시작하기" 버튼 클릭
         
     } catch (error) {
         console.error('앱 초기화 중 오류:', error);
-        // 오류가 발생해도 사용자가 "시작하기" 버튼으로 진행할 수 있음
     }
 };
 
@@ -287,11 +285,11 @@ function startPractice(word) {
             if (practiceTitle) practiceTitle.textContent = '따라말하기 연습';
             if (listenButtonContainer) listenButtonContainer.style.display = 'block';
             if (targetWordDisplay) {
-                targetWordDisplay.textContent = '탭하여 단어 보기';
+                targetWordDisplay.textContent = '단어 보기';
                 targetWordDisplay.classList.add('hidden');
             }
             if (practiceCard) practiceCard.classList.add('clickable');
-            if (cardLabel) cardLabel.textContent = '목표 단어 (탭하여 보기/숨기기)';
+            if (cardLabel) cardLabel.textContent = '목표 단어';
         } else { 
             if (practiceTitle) practiceTitle.textContent = '읽기 연습';
             if (listenButtonContainer) listenButtonContainer.style.display = 'none';
@@ -320,7 +318,7 @@ function toggleTargetWord() {
             targetWordDisplay.textContent = practiceWord.text;
             targetWordDisplay.classList.remove('hidden');
         } else {
-            targetWordDisplay.textContent = '탭하여 단어 보기';
+            targetWordDisplay.textContent = '단어 보기';
             targetWordDisplay.classList.add('hidden');
         }
     } catch (error) {
