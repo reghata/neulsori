@@ -177,20 +177,24 @@ body.font-large header h2 {
 /* ===== 설정 화면 ===== */
 #settings-screen > div > div button {
     width: 100%;
-    padding: 10px 8px;     /* 상하 10px, 좌우 8px */
+    padding: 8px 6px;
     margin: 5px 0;
     border: none;
     background: #2196F3;
     color: white;
     border-radius: 10px;
-    font-size: 0.85em;     /* 약간 작은 폰트 */
+    font-size: 0.85em;
     cursor: pointer;
     transition: background-color 0.3s;
     
-    /* 줄바꿈 방지 */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* 줄바꿈 허용하고 높이 고정 */
+    white-space: normal;      /* 줄바꿈 허용 */
+    min-height: 45px;         /* 최소 높이 고정 */
+    display: flex;
+    align-items: center;      /* 텍스트 세로 가운데 정렬 */
+    justify-content: center;  /* 텍스트 가로 가운데 정렬 */
+    text-align: center;
+    line-height: 1.2;         /* 줄 간격 조정 */
 }
 
 #settings-screen button:active {
