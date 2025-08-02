@@ -170,6 +170,8 @@ function selectVoiceByGender(gender) {
                            name.includes('jinho') ||
                            name.includes('inho') ||
                            name.includes('woosik') ||
+                           name.includes('eddy') ||
+                           name.includes('reed') ||
                            // iOS 한글 패턴 추가
                            name.includes('민수') ||
                            name.includes('진호') ||
