@@ -50,19 +50,11 @@ window.onload = function() {
             versionInfo.addEventListener('click', handleVersionClick);
         }
         
-        // 2초 후 홈 화면으로 이동
-        setTimeout(() => {
-            document.getElementById('splash-screen').classList.remove('active');
-            showScreen('home-screen');
-        }, 2000);
+        // 기존 자동 전환 코드 제거 - 이제 사용자가 직접 "시작하기" 버튼 클릭
         
     } catch (error) {
         console.error('앱 초기화 중 오류:', error);
-        // 오류가 발생해도 홈 화면으로 이동
-        setTimeout(() => {
-            document.getElementById('splash-screen').classList.remove('active');
-            showScreen('home-screen');
-        }, 1000);
+        // 오류가 발생해도 사용자가 "시작하기" 버튼으로 진행할 수 있음
     }
 };
 
@@ -907,5 +899,17 @@ function goBackFromSettings() {
     } catch (error) {
         console.error('설정 화면 뒤로가기 오류:', error);
         showScreen('home-screen'); /* 오류 시 홈으로 */
+    }
+}
+
+/* 스플래시 화면에서 앱 시작 함수 */
+function startApp() {
+    try {
+        document.getElementById('splash-screen').classList.remove('active');
+        showScreen('home-screen');
+    } catch (error) {
+        console.error('앱 시작 오류:', error);
+        /* 오류가 발생해도 홈 화면으로 이동 */
+        location.reload();
     }
 }

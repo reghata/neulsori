@@ -14,7 +14,20 @@
     <div id="splash-screen" class="screen active">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
             <h1 style="font-size: 72px; color: #4CAF50; margin-bottom: 30px;">늘소리</h1>
-            <div style="font-size: 24px; color: #666;">로딩 중...</div>
+            <p style="font-size: 24px; color: #666; margin-bottom: 40px;">단어 말하기</p>
+            <button onclick="startApp()" style="
+                background: #4CAF50; 
+                color: white; 
+                border: none; 
+                padding: 20px 40px; 
+                font-size: 24px; 
+                border-radius: 15px; 
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                transition: all 0.3s;
+            " onmouseover="this.style.background='#45A049'" onmouseout="this.style.background='#4CAF50'">
+                시작하기
+            </button>
         </div>
     </div>
 
