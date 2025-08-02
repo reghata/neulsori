@@ -53,37 +53,104 @@ function loadVoices() {
     }
 }
 
-
-// 성별에 따른 음성 선택
+// 성별에 따른 음성 선택 수정 (디버깅 정보 포함)
 function selectVoiceByGender(gender) {
     try {
         const allVoices = window.speechSynthesis.getVoices();
-        if (allVoices.length === 0) return;
+        if (allVoices.length === 0) {
+            console.log('사용 가능한 음성이 없습니다.');
+            return;
+        }
+        
+        // 모든 음성 로그 출력 (디버깅용)
+        console.log('=== 사용 가능한 모든 음성 ===');
+        allVoices.forEach((voice, index) => {
+            console.log(`${index}: ${voice.name} (${voice.lang}) - ${voice.gender || 'gender정보없음'}`);
+        });
         
         let selectedVoice = null;
         
-        // 한국어 음성 찾기
-        const koreanVoices = allVoices.filter(voice => voice.lang.includes('ko'));
+        // 한국어 음성 찾기 (더 넓은 조건)
+        const koreanVoices = allVoices.filter(voice => {
+            const lang = voice.lang.toLowerCase();
+            const name = voice.name.toLowerCase();
+            return lang.includes('ko') || 
+                   lang.includes('korean') || 
+                   name.includes('korean') ||
+                   name.includes('한국');
+        });
+        
+        console.log('=== 한국어 음성 목록 ===');
+        koreanVoices.forEach((voice, index) => {
+            console.log(`${index}: ${voice.name} (${voice.lang})`);
+        });
         
         if (koreanVoices.length > 0) {
             if (gender === 'female') {
-                selectedVoice = koreanVoices.find(voice => 
-                    voice.name.includes('Female') || voice.name.includes('여성') || 
-                    voice.name.includes('Yuna') || voice.name.includes('Sora')
-                ) || koreanVoices[0];
-            } else {
-                selectedVoice = koreanVoices.find(voice => 
-                    voice.name.includes('Male') || voice.name.includes('남성') || 
-                    voice.name.includes('Minsu') || voice.name.includes('Jinho')
-                ) || koreanVoices[0];
+                // 여성 음성 찾기 (다양한 패턴으로 검색)
+                selectedVoice = koreanVoices.find(voice => {
+                    const name = voice.name.toLowerCase();
+                    return name.includes('female') || 
+                           name.includes('여성') || 
+                           name.includes('woman') ||
+                           name.includes('yuna') || 
+                           name.includes('sora') ||
+                           name.includes('heami') ||
+                           name.includes('seoyeon') ||
+                           name.includes('kyuri') ||
+                           // 브라우저별 여성 음성 패턴
+                           name.includes('nanum') ||
+                           name.includes('기본 여성') ||
+                           // 첫 번째가 보통 여성인 경우가 많음
+                           (voice === koreanVoices[0] && koreanVoices.length > 1);
+                });
+                
+                // 여성 음성을 찾지 못했으면 첫 번째 한국어 음성 사용
+                if (!selectedVoice) {
+                    selectedVoice = koreanVoices[0];
+                    console.log('여성 음성을 찾지 못해 첫 번째 한국어 음성 사용');
+                }
+            } else { // male
+                // 남성 음성 찾기
+                selectedVoice = koreanVoices.find(voice => {
+                    const name = voice.name.toLowerCase();
+                    return name.includes('male') || 
+                           name.includes('남성') || 
+                           name.includes('man') ||
+                           name.includes('minsu') || 
+                           name.includes('jinho') ||
+                           name.includes('inho') ||
+                           name.includes('woosik') ||
+                           // 브라우저별 남성 음성 패턴
+                           name.includes('기본 남성');
+                });
+                
+                // 남성 음성을 찾지 못했으면 두 번째 한국어 음성 시도
+                if (!selectedVoice) {
+                    if (koreanVoices.length > 1) {
+                        selectedVoice = koreanVoices[1];
+                        console.log('남성 음성을 찾지 못해 두 번째 한국어 음성 사용');
+                    } else {
+                        selectedVoice = koreanVoices[0];
+                        console.log('남성 음성을 찾지 못해 첫 번째 한국어 음성 사용');
+                    }
+                }
             }
         } else {
-            // 한국어 음성이 없으면 첫 번째 음성 사용
+            // 한국어 음성이 없으면 기본 음성 사용
             selectedVoice = allVoices[0];
+            console.log('한국어 음성을 찾을 수 없어 기본 음성 사용:', selectedVoice.name);
         }
         
         if (selectedVoice) {
             selectedVoiceIndex = allVoices.indexOf(selectedVoice);
+            console.log(`=== 최종 선택된 음성 (${gender}) ===`);
+            console.log(`이름: ${selectedVoice.name}`);
+            console.log(`언어: ${selectedVoice.lang}`);
+            console.log(`인덱스: ${selectedVoiceIndex}`);
+        } else {
+            console.error('음성 선택 실패');
+            selectedVoiceIndex = 0;
         }
     } catch (error) {
         console.error('음성 선택 오류:', error);
@@ -91,6 +158,23 @@ function selectVoiceByGender(gender) {
     }
 }
 
+// 음성 성별 변경 함수 수정 (즉시 테스트 포함)
+function changeVoiceGender(gender) {
+    try {
+        console.log(`음성 성별을 ${gender}로 변경 시도`);
+        
+        storage.updateSettings({ voiceGender: gender });
+        voiceGender = gender;
+        selectVoiceByGender(gender);
+        highlightCurrentSettings();
+        
+        // 변경된 음성으로 즉시 테스트
+        const testText = gender === 'female' ? '여성 음성입니다' : '남성 음성입니다';
+        speak(testText);
+    } catch (error) {
+        console.error('음성 성별 변경 오류:', error);
+    }
+}
 
 /* 기존 speak 함수 수정 */
 function speak(text, wordId) {
@@ -571,17 +655,6 @@ function changeSpeechRate(rate) {
     }
 }
 
-function changeVoiceGender(gender) {
-    try {
-        storage.updateSettings({ voiceGender: gender });
-        voiceGender = gender;
-        selectVoiceByGender(gender);
-        highlightCurrentSettings();
-        speak('안녕하세요');
-    } catch (error) {
-        console.error('음성 성별 변경 오류:', error);
-    }
-}
 
 function highlightCurrentSettings() {
     try {
