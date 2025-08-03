@@ -860,6 +860,7 @@ function importWords(event) {
     }
 }
 
+
 function exportWords() {
     try {
         const csv = storage.getAllWords().map(w => w.text).join('\n');
