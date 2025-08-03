@@ -808,7 +808,8 @@ function importWords(event) {
 function exportWords() {
     try {
         const csv = storage.getAllWords().map(w => w.text).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        // CSV 데이터 앞에 BOM(\uFEFF)을 추가합니다.
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = `늘소리_단어목록_${new Date().toLocaleDateString()}.csv`;
