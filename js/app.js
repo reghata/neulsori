@@ -786,6 +786,18 @@ function importWords(event) {
     try {
         const file = event.target.files[0];
         if (!file) return;
+
+        // 허용할 파일 확장자를 정의합니다.
+        const allowedExtensions = ['.csv', '.txt'];
+        const fileName = file.name.toLowerCase();
+        const fileExtension = '.' + fileName.split('.').pop();
+
+        // 파일 확장자를 확인하여 허용된 형식이 아니면 경고를 표시하고 중단합니다.
+        if (!allowedExtensions.includes(fileExtension)) {
+            alert('CSV 또는 TXT 파일만 불러올 수 있습니다. 음성 파일 등 다른 형식은 지원하지 않습니다.');
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(e) {
             const text = e.target.result;
@@ -797,11 +809,19 @@ function importWords(event) {
             alert(`${addedCount}개의 새 단어를 추가했습니다.`);
             changeSortOrder(currentSortOrder);
         };
+
+        reader.onerror = function() {
+            alert('파일을 읽는 중 오류가 발생했습니다.');
+        };
+        
         reader.readAsText(file);
-        event.target.value = '';
+
     } catch (error) {
         console.error('단어 가져오기 오류:', error);
         alert('파일을 읽는 중 오류가 발생했습니다.');
+    } finally {
+        // 사용자가 동일한 파일을 다시 선택할 수 있도록 입력 값을 항상 초기화합니다.
+        event.target.value = '';
     }
 }
 

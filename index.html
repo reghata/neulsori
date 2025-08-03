@@ -321,10 +321,17 @@
                 <h4>마이크가 작동하지 않을 때</h4>
                 <ul>
                     <li>브라우저에서 마이크 권한을 허용했는지 확인하세요</li>
+                    늘소리는 일반 설치 앱이 아닌 '웹 앱'이므로, 휴대폰의 전체 설정이 아닌 **크롬(Chrome) 브라우저의 설정**에서 권한을 관리해야 합니다.
+                    <ol style="margin-top: 5px; margin-left: 15px; list-style-type: decimal;">
+                        <li>크롬 앱 실행 → 오른쪽 위 점 3개(⋮) 메뉴</li>
+                        <li>설정 → 사이트 설정 → 마이크</li>
+                        <li>목록에서 늘소리 주소를 찾아 권한을 '허용'으로 변경하세요.</li>
+                    </ol>
                     <li>다른 앱에서 마이크를 사용하고 있지 않은지 확인하세요</li>
                 </ul>
 
-                <h4>앱이 느려질 때</h4>
+                <h4>앱이 느려거지거나 오류가 발생할 때</h4>
+
                 <ul>
                     <li>브라우저를 완전히 닫았다가 다시 열어보세요</li>
                     <li>기기를 재시작해보세요</li>
@@ -413,12 +420,15 @@
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>데이터 관리</h3>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <button onclick="document.getElementById('file-input').click()">📥 단어 가져오기 (CSV)</button>
+                    <button onclick="document.getElementById('file-input').click()">📥 단어 가져오기</button>
+                    <p style="font-size: 0.8em; color: #666; text-align: center; margin-top: -5px; margin-bottom: 5px;">
+                        한 줄에 단어 하나씩 입력된<br>CSV 또는 TXT 파일을 선택해 주세요.
+                    </p>
                     <input type="file" id="file-input" accept=".csv,.txt" style="display: none;" onchange="importWords(event)">
                     <button onclick="exportWords()">📤 단어 내보내기</button>
                     <button onclick="resetApp()" style="background: #f44336; color: white;">🔄 초기화</button>
                 </div>
-            </div>
+            </div>            </div>
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>사용 통계</h3>
                 <div id="stats-display" style="line-height: 1.8;"></div>
