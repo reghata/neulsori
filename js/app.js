@@ -783,49 +783,80 @@ function applySettings() {
 }
 
 function importWords(event) {
-    try {
-        const file = event.target.files[0];
-        if (!file) return;
+    // 파일 입력 요소를 가져옵니다.
+    const fileInput = event.target;
+    if (!fileInput.files || fileInput.files.length === 0) {
+        // 파일이 선택되지 않았으면 함수를 조용히 종료합니다.
+        return;
+    }
 
+    const file = fileInput.files[0];
+
+    try {
         const allowedExtensions = ['.csv', '.txt'];
         const fileName = file.name.toLowerCase();
-        // 파일 확장자 부분을 좀 더 안전하게 수정합니다.
         const fileExtension = fileName.slice(fileName.lastIndexOf('.'));
 
         if (!allowedExtensions.includes(fileExtension)) {
-            alert('CSV 또는 TXT 파일만 불러올 수 있습니다. 음성 파일 등 다른 형식은 지원하지 않습니다.');
-            event.target.value = ''; // 잘못된 파일 선택 시 입력 초기화
+            alert('CSV 또는 TXT 파일만 불러올 수 있습니다.');
+            fileInput.value = ''; // 입력 값 초기화
             return;
         }
 
         const reader = new FileReader();
+
         reader.onload = function(e) {
-            const text = e.target.result;
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line);
-            let addedCount = 0;
-            lines.forEach(line => {
-                // BOM 문자가 있을 경우 제거하여 단어가 깨지는 것을 방지합니다.
-                const cleanLine = line.replace(/^\uFEFF/, '');
-                if (cleanLine && storage.addWord(cleanLine).success) {
-                    addedCount++;
+            try {
+                const text = e.target.result;
+                if (typeof text !== 'string') {
+                    alert('파일 내용을 텍스트로 읽을 수 없습니다. 다른 파일로 시도해 주세요.');
+                    return;
                 }
-            });
-            alert(`${addedCount}개의 새 단어를 추가했습니다.`);
-            changeSortOrder(currentSortOrder);
+
+                const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+                let addedCount = 0;
+                
+                lines.forEach(line => {
+                    // UTF-8 BOM 문자가 있을 경우 제거합니다.
+                    const cleanLine = line.replace(/^\uFEFF/, '');
+                    if (cleanLine && storage.addWord(cleanLine).success) {
+                        addedCount++;
+                    }
+                });
+
+                if (addedCount > 0) {
+                    alert(`${addedCount}개의 새 단어를 추가했습니다.`);
+                } else if (lines.length > 0) {
+                    alert('모든 단어가 이미 목록에 존재합니다.');
+                } else {
+                    alert('파일에 추가할 단어가 없습니다.');
+                }
+                
+                changeSortOrder(currentSortOrder);
+
+            } catch (loadError) {
+                // 파일 내용을 처리하는 도중 발생하는 오류를 잡습니다.
+                console.error('File content processing error:', loadError);
+                alert(`단어 처리 중 오류가 발생했습니다: ${loadError.message}`);
+            }
         };
 
-        reader.onerror = function() {
-            alert('파일을 읽는 중 오류가 발생했습니다.');
+        reader.onerror = function(e) {
+            // 파일을 읽는 것 자체를 실패했을 때 발생하는 오류를 잡습니다.
+            console.error('FileReader error:', e.target.error);
+            alert(`파일을 읽는 데 실패했습니다. 파일이 손상되었거나 접근 권한이 없을 수 있습니다. (오류: ${e.target.error.name})`);
         };
         
-        // 바로 이 부분이 핵심입니다. 인코딩 방식을 'UTF-8'로 명시합니다.
+        // 파일을 UTF-8 텍스트로 읽도록 명시합니다.
         reader.readAsText(file, 'UTF-8');
 
-    } catch (error) {
-        console.error('단어 가져오기 오류:', error);
-        alert('파일을 읽는 중 오류가 발생했습니다.');
+    } catch (processError) {
+        // 전체 프로세스에서 예상치 못한 오류를 잡습니다.
+        console.error('File import process error:', processError);
+        alert(`파일 가져오기 과정에서 오류가 발생했습니다: ${processError.message}`);
     } finally {
-        event.target.value = '';
+        // 오류 발생 여부와 상관없이 항상 파일 선택을 초기화합니다.
+        fileInput.value = '';
     }
 }
 
