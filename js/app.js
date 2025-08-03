@@ -787,14 +787,14 @@ function importWords(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        // 허용할 파일 확장자를 정의합니다.
         const allowedExtensions = ['.csv', '.txt'];
         const fileName = file.name.toLowerCase();
-        const fileExtension = '.' + fileName.split('.').pop();
+        // 파일 확장자 부분을 좀 더 안전하게 수정합니다.
+        const fileExtension = fileName.slice(fileName.lastIndexOf('.'));
 
-        // 파일 확장자를 확인하여 허용된 형식이 아니면 경고를 표시하고 중단합니다.
         if (!allowedExtensions.includes(fileExtension)) {
             alert('CSV 또는 TXT 파일만 불러올 수 있습니다. 음성 파일 등 다른 형식은 지원하지 않습니다.');
+            event.target.value = ''; // 잘못된 파일 선택 시 입력 초기화
             return;
         }
 
@@ -804,7 +804,11 @@ function importWords(event) {
             const lines = text.split('\n').map(line => line.trim()).filter(line => line);
             let addedCount = 0;
             lines.forEach(line => {
-                if (storage.addWord(line).success) addedCount++;
+                // BOM 문자가 있을 경우 제거하여 단어가 깨지는 것을 방지합니다.
+                const cleanLine = line.replace(/^\uFEFF/, '');
+                if (cleanLine && storage.addWord(cleanLine).success) {
+                    addedCount++;
+                }
             });
             alert(`${addedCount}개의 새 단어를 추가했습니다.`);
             changeSortOrder(currentSortOrder);
@@ -814,13 +818,13 @@ function importWords(event) {
             alert('파일을 읽는 중 오류가 발생했습니다.');
         };
         
-        reader.readAsText(file);
+        // 바로 이 부분이 핵심입니다. 인코딩 방식을 'UTF-8'로 명시합니다.
+        reader.readAsText(file, 'UTF-8');
 
     } catch (error) {
         console.error('단어 가져오기 오류:', error);
         alert('파일을 읽는 중 오류가 발생했습니다.');
     } finally {
-        // 사용자가 동일한 파일을 다시 선택할 수 있도록 입력 값을 항상 초기화합니다.
         event.target.value = '';
     }
 }

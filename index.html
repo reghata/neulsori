@@ -417,18 +417,23 @@
                 <textarea id="bulk-words" placeholder="여러 단어를 한 줄씩 입력하세요" style="width: 100%; height: 150px; padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 5px;"></textarea>
                 <button onclick="bulkAddWords()" style="margin-top: 10px; width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 10px; font-size: 18px;">일괄 추가</button>
             </div>
-            <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
-                <h3>데이터 관리</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <button onclick="document.getElementById('file-input').click()">📥 단어 가져오기</button>
-                    <p style="font-size: 0.8em; color: #666; text-align: center; margin-top: -5px; margin-bottom: 5px;">
-                        한 줄에 단어 하나씩 입력된<br>CSV 또는 TXT 파일을 선택해 주세요.
-                    </p>
-                    <input type="file" id="file-input" accept=".csv,.txt" style="display: none;" onchange="importWords(event)">
-                    <button onclick="exportWords()">📤 단어 내보내기</button>
-                    <button onclick="resetApp()" style="background: #f44336; color: white;">🔄 초기화</button>
-                </div>
-            </div>            </div>
+        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
+            <h3>데이터 관리</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <button onclick="document.getElementById('file-input').click()">📥 단어 가져오기</button>
+                <p style="font-size: 0.8em; color: #666; text-align: center; margin-top: -5px; margin-bottom: 5px;">
+                    한 줄에 단어 하나씩 입력된<br><b>CSV 또는 TXT (UTF-8 형식)</b> 파일을 선택해 주세요.
+                </p>
+                <input type="file" id="file-input" accept=".csv,.txt" style="display: none;" onchange="importWords(event)">
+                
+                <button onclick="exportWords()">📤 단어 내보내기</button>
+                <p style="font-size: 0.8em; color: #666; text-align: center; margin-top: -5px; margin-bottom: 5px;">
+                    엑셀에서 열 때 한글 깨짐 방지를 위해<br><b>CSV (UTF-8 형식)</b>으로 저장됩니다.
+                </p>
+                
+                <button onclick="resetApp()" style="background: #f44336; color: white;">🔄 초기화</button>
+            </div>
+        </div>          </div>
             <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 10px;">
                 <h3>사용 통계</h3>
                 <div id="stats-display" style="line-height: 1.8;"></div>
